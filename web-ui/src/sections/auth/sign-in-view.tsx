@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -12,17 +12,62 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
+import { sigIn } from 'src/api/userApi';
+import { useAuth } from '../../context/auth/AuthContext';
+import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
+import { AuthenticateRequest } from 'src/api/request/AuthenticateRequest';
+import { AxiosResponse } from 'axios';
+import { AuthenticateResponse, TenantDetails } from 'src/api/response/authenticate';
+
 
 // ----------------------------------------------------------------------
 
 export function SignInView() {
   const router = useRouter();
+  const { setToken, setRefreshToken, setCurrentTenantId, setTenantDetailsList } = useAuth();
+  const { showMessage } = useSnackbar();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({ email: false, password: false });
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = useCallback(() => {
-    router.push('/');
-  }, [router]);
+  const getDefaultTenantId = (tenants: TenantDetails[]) => {
+    let defaultTenant = tenants.find((tenant) => tenant.isDefault);
+    if (!defaultTenant) defaultTenant = tenants.find((tenant) => tenant.tenantId !== null);
+    return defaultTenant ? defaultTenant.tenantId : null;
+  };
+
+  const handleClick = () => {
+    const newErrors = {
+      email: !email.trim(),
+      password: !password.trim(),
+    };
+    setErrors(newErrors);
+
+    if (newErrors.email || newErrors.password) return;
+
+    const authenticateRequest: AuthenticateRequest = { email, password };
+
+    sigIn(authenticateRequest)
+      .then((response: AxiosResponse<AuthenticateResponse, any>) => {
+        setToken(response.data.token);
+        setRefreshToken(response.data.refreshToken);
+        setTenantDetailsList(response.data.tenantDetailsList);
+        setCurrentTenantId(getDefaultTenantId(response.data.tenantDetailsList));
+        router.push('/home');
+      })
+      .catch((error) => {
+        console.log(error);
+        const errorMessage = error?.response?.data?.message
+        showMessage(errorMessage?errorMessage: "Unknown error!", "error")
+      })
+  }
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (token) router.push('/home');
+  }, [router])
 
   const renderForm = (
     <Box
@@ -36,14 +81,18 @@ export function SignInView() {
         fullWidth
         name="email"
         label="Email address"
-        defaultValue="hello@gmail.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        error={errors.email}
+        helperText={errors.email && 'Email is required'}
+        defaultValue=""
         sx={{ mb: 3 }}
         slotProps={{
           inputLabel: { shrink: true },
         }}
       />
 
-      <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
+      <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}  href="/forgot-password">
         Forgot password?
       </Link>
 
@@ -51,8 +100,12 @@ export function SignInView() {
         fullWidth
         name="password"
         label="Password"
-        defaultValue="@demo1234"
+        defaultValue=""
         type={showPassword ? 'text' : 'password'}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={errors.password}
+        helperText={errors.password && 'Password is required'}
         slotProps={{
           inputLabel: { shrink: true },
           input: {
@@ -74,7 +127,7 @@ export function SignInView() {
         type="submit"
         color="inherit"
         variant="contained"
-        onClick={handleSignIn}
+        onClick={handleClick}
       >
         Sign in
       </Button>
@@ -93,6 +146,8 @@ export function SignInView() {
         }}
       >
         <Typography variant="h5">Sign in</Typography>
+
+        {/*
         <Typography
           variant="body2"
           sx={{
@@ -104,33 +159,9 @@ export function SignInView() {
             Get started
           </Link>
         </Typography>
+        */}
       </Box>
       {renderForm}
-      <Divider sx={{ my: 3, '&::before, &::after': { borderTopStyle: 'dashed' } }}>
-        <Typography
-          variant="overline"
-          sx={{ color: 'text.secondary', fontWeight: 'fontWeightMedium' }}
-        >
-          OR
-        </Typography>
-      </Divider>
-      <Box
-        sx={{
-          gap: 1,
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        <IconButton color="inherit">
-          <Iconify width={22} icon="socials:google" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify width={22} icon="socials:github" />
-        </IconButton>
-        <IconButton color="inherit">
-          <Iconify width={22} icon="socials:twitter" />
-        </IconButton>
-      </Box>
     </>
   );
 }

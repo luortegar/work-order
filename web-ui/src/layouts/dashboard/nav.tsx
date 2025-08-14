@@ -112,11 +112,13 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
   return (
     <>
-      <Logo />
+      <Box sx={{ mb: 2 }}> {/* mb = margin-bottom */}
+        <Logo />
+      </Box>
 
       {slots?.topArea}
 
-      <WorkspacesPopover data={workspaces} sx={{ my: 2 }} />
+      {/*<WorkspacesPopover data={workspaces} sx={{ my: 2 }} />*/}
 
       <Scrollbar fillContent>
         <Box
@@ -187,8 +189,9 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
       </Scrollbar>
 
       {slots?.bottomArea}
-
+      {/*
       <NavUpgrade />
+      */}
     </>
   );
 }

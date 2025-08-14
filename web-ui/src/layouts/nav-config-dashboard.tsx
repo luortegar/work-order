@@ -12,11 +12,18 @@ export type NavItem = {
   info?: React.ReactNode;
 };
 
+
+//https://www.svgrepo.com/collection/solar-bold-duotone-icons/
 export const navData = [
   {
     title: 'Dashboard',
-    path: '/',
+    path: '/home',
     icon: icon('ic-analytics'),
+  },
+  {
+    title: 'Work order',
+    path: '/work-order',
+    icon: icon('ic-work-order'),
   },
   {
     title: 'User',

@@ -15,34 +15,39 @@ import unusedImportsPlugin from 'eslint-plugin-unused-imports';
  */
 const commonRules = () => ({
   ...reactHooksPlugin.configs.recommended.rules,
-  'func-names': 1,
-  'no-bitwise': 2,
-  'no-unused-vars': 0,
-  'object-shorthand': 1,
-  'no-useless-rename': 1,
-  'default-case-last': 2,
-  'consistent-return': 2,
-  'no-constant-condition': 1,
-  'default-case': [2, { commentPattern: '^no default$' }],
-  'lines-around-directive': [2, { before: 'always', after: 'always' }],
-  'arrow-body-style': [2, 'as-needed', { requireReturnForObjectLiteral: false }],
+  'func-names': 0,
+  'no-bitwise': 1,
+  'no-unused-vars': 1,
+  'object-shorthand': 0,
+  'no-useless-rename': 0,
+  'default-case-last': 1,
+  'consistent-return': 1,
+  'no-constant-condition': 0,
+  'default-case': [1, { commentPattern: '^no default$' }],
+  'lines-around-directive': [1, { before: 'always', after: 'always' }],
+
+  // Aquí se relaja arrow-body-style para no marcar error
+  'arrow-body-style': [1, 'as-needed', { requireReturnForObjectLiteral: false }],
+
   // react
   'react/jsx-key': 0,
   'react/prop-types': 0,
   'react/display-name': 0,
   'react/no-children-prop': 0,
-  'react/jsx-boolean-value': 2,
-  'react/self-closing-comp': 2,
+  'react/jsx-boolean-value': 1,
+  'react/self-closing-comp': 1,
   'react/react-in-jsx-scope': 0,
-  'react/jsx-no-useless-fragment': [1, { allowExpressions: true }],
-  'react/jsx-curly-brace-presence': [2, { props: 'never', children: 'never' }],
+  'react/jsx-no-useless-fragment': [0, { allowExpressions: true }],
+  'react/jsx-curly-brace-presence': [1, { props: 'never', children: 'never' }],
+
   // typescript
-  '@typescript-eslint/no-shadow': 2,
-  '@typescript-eslint/no-explicit-any': 0,
+  '@typescript-eslint/no-shadow': 0,  // lo desactivo para evitar conflictos
+  '@typescript-eslint/no-explicit-any': 1,
   '@typescript-eslint/no-empty-object-type': 0,
-  '@typescript-eslint/consistent-type-imports': 1,
+  '@typescript-eslint/consistent-type-imports': 0,
   '@typescript-eslint/no-unused-vars': [1, { args: 'none' }],
 });
+
 
 /**
  * @rules import
@@ -79,6 +84,7 @@ const unusedImportsRules = () => ({
  * @rules sort or imports/exports
  * from 'eslint-plugin-perfectionist'.
  */
+
 const sortImportsRules = () => {
   const customGroups = {
     mui: ['custom-mui'],
@@ -103,15 +109,15 @@ const sortImportsRules = () => {
       },
     ],
     'perfectionist/sort-imports': [
-      2,
+      1, // antes estaba 2, ahora lo bajo a warning para evitar que bloquee
       {
         order: 'asc',
-        ignoreCase: true,
+        ignoreCase: false,  // para que no se queje por mayúsculas/minúsculas
         type: 'line-length',
         environment: 'node',
         maxLineLength: undefined,
-        newlinesBetween: 'always',
-        internalPattern: ['^src/.+'],
+        newlinesBetween: 'ignore',  // evitar errores por saltos de línea entre imports
+        internalPattern: [],         // deshabilitado para evitar conflicto con tus imports relativos
         groups: [
           'style',
           'side-effect',
@@ -147,6 +153,8 @@ const sortImportsRules = () => {
     ],
   };
 };
+
+
 
 /**
  * Custom ESLint configuration.

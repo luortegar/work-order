@@ -15,7 +15,11 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
+export const WorkOrder = lazy(() => import('src/pages/work-order'));
+
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
+export const ForgotpasswordPage = lazy(() => import('src/pages/forgot-password'));
+
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
@@ -49,20 +53,30 @@ export const routesSection: RouteObject[] = [
       </DashboardLayout>
     ),
     children: [
-      { index: true, element: <DashboardPage /> },
+      { path: 'home', element: <DashboardPage /> },
+      { path: 'work-order', element: <WorkOrder /> },
       { path: 'user', element: <UserPage /> },
       { path: 'products', element: <ProductsPage /> },
       { path: 'blog', element: <BlogPage /> },
     ],
   },
+
   {
-    path: 'sign-in',
     element: (
-      <AuthLayout>
-        <SignInPage />
-      </AuthLayout>
+       <AuthLayout>
+        <Suspense fallback={renderFallback()}>
+          <Outlet />
+        </Suspense>
+       </AuthLayout>
     ),
+    children: [
+      {index: true, element: <SignInPage /> },
+      { path: 'sign-in', element: <SignInPage /> },
+      { path: 'forgot-password', element: <ForgotpasswordPage /> },
+
+    ],
   },
+
   {
     path: '404',
     element: <Page404 />,
