@@ -40,12 +40,17 @@ const commonRules = () => ({
   'react/jsx-no-useless-fragment': [0, { allowExpressions: true }],
   'react/jsx-curly-brace-presence': [1, { props: 'never', children: 'never' }],
 
+    // ✅ desactiva el warning de caracteres no escapados
+  'react/no-unescaped-entities': 0,
+
   // typescript
   '@typescript-eslint/no-shadow': 0,  // lo desactivo para evitar conflictos
   '@typescript-eslint/no-explicit-any': 1,
   '@typescript-eslint/no-empty-object-type': 0,
   '@typescript-eslint/consistent-type-imports': 0,
   '@typescript-eslint/no-unused-vars': [1, { args: 'none' }],
+
+  
 });
 
 

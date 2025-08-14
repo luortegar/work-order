@@ -1,0 +1,75 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import SimpleTable from 'src/components/table/simple-table';
+import { Container, Chip, Button } from '@mui/material';
+import { listBranch } from 'src/api/branchApi';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import {Iconify} from 'src/components/iconify';
+import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
+import { listBranchUser } from 'src/api/userCrudApi';
+
+
+export default function EmployeesList() {
+  const { clientId, branchId } = useParams();
+
+  const { showMessage } = useSnackbar();
+  const navigate = useNavigate();
+
+  const columns: GridColDef[] = [
+    {
+        hideable: false,
+        field: 'userId',
+        headerName: 'User ID',
+        width: 200,
+        flex: 0.5,
+        renderCell: (params: GridRenderCellParams) => (
+          <Chip
+            label={params.value}
+            color='default'
+            variant='outlined'
+            size='small'
+            onClick={() => navigate(`/home/client/${clientId}/branch/${branchId}/employees/${params.row.userId}`)}
+          />
+        ),
+    },
+    { field: 'firstName', headerName: 'First Name', width: 200, flex: 0.5 },
+    { field: 'lastName', headerName: 'Last Name', width: 200, flex: 0.5 },
+    { field: 'email', headerName: 'Email', width: 250, flex: 0.5 },
+  ];
+
+  const [dataList, setDataList] = useState([]);
+  const [rowCount, setRowCount] = useState(0);
+
+  useEffect(() => {
+    refreshData(5, 0, '', '');
+  }, []);
+
+  const refreshData = (rowsPerPage:number, page:number, sort:string, filterName:string) => {
+    if(branchId){
+      listBranchUser(branchId, rowsPerPage, page, sort, filterName).then((r) => {
+        setDataList(r.data.content);
+        setRowCount(r.data.totalElements);
+        console.log(r);
+      });
+    }
+  };
+
+  return (
+    <Container maxWidth="xl">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+        <Typography variant="h4">Client employees</Typography>
+        <Button
+          variant="contained"
+          color="inherit"
+          startIcon={<Iconify icon="eva:checkmark-fill" />}
+          onClick={() => navigate(`/home/client/${clientId}/branch/${branchId}/employees/new`)}
+        >
+         Add new employee
+        </Button>
+      </Stack>
+      <SimpleTable columns={columns} refreshData={refreshData} dataList={dataList} rowCount={rowCount} getRowId={(row) => row.userId} pageSizeDefault={0} />
+    </Container>
+  );
+}
