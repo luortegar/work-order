@@ -4,6 +4,9 @@ import cl.creando.skappserver.workorder.entity.Client;
 import cl.creando.skappserver.workorder.entity.TypeOfPurchase;
 import lombok.Getter;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+
 
 @Setter
 @Getter
@@ -14,6 +17,7 @@ public class ClientRequest {
     private String address;
     private String commune;
     private String city;
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     private TypeOfPurchase typeOfPurchase;
 
     public void setValues(Client client) {

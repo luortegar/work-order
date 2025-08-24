@@ -27,7 +27,6 @@ public class Branch {
     private String branchName;
     private String address;
     private String commune;
-    private String region;
     @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
     @JoinColumn(name = "clientId")
     private Client client;

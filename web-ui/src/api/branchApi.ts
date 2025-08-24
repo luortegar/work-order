@@ -1,4 +1,5 @@
 import axios from './axiosInstance'
+import { BranchAutocompleteResponse, BranchResponse } from './types/branchTypes'
 
 export const viewBranch = async (id: string) =>
     axios.get(`/private/v1/branch-offices/${id}`)
@@ -14,3 +15,8 @@ export const updateBranch = async (id: string, payload: any) =>
 
 export const deleteBranchById = async (id: string) =>
     axios.delete(`/private/v1/branch-offices/${id}`)
+
+export const autocompleteBranch = async (searchTerm:string): Promise<BranchAutocompleteResponse[]> =>{
+   const {data} = await axios.get<BranchAutocompleteResponse[]>(`/private/v1/branch-offices/autocomplete?searchTerm=${searchTerm}`)
+    return data;
+}

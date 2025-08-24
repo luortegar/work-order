@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios'
-import history from './history'
 
 const baseURL =  import.meta.env.VITE_BASE_SERVER_URL;
 
@@ -15,8 +14,8 @@ axiosInstance.interceptors.response.use(
     console.error('Error en la solicitud:', error);
     
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      sessionStorage.clear()
-      history.push('/login')
+      //sessionStorage.clear()
+      //window.location.href = '/sign-in'
     }
     
     return Promise.reject(error)

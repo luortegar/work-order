@@ -37,21 +37,21 @@ export const themeConfig: ThemeConfig = {
    * Palette
    *************************************** */
   palette: {
-    primary: {
-      lighter: '#D0ECFE',
-      light: '#73BAFB',
+primary: {
       main: '#1877F2',
+      light: '#73BAFB',
       dark: '#0C44AE',
-      darker: '#042174',
       contrastText: '#FFFFFF',
+      lighter: '#D0ECFE',
+      darker: '#042174',
     },
     secondary: {
-      lighter: '#EFD6FF',
-      light: '#C684FF',
-      main: '#8E33FF',
-      dark: '#5119B7',
-      darker: '#27097A',
+      main: '#9E9E9E',      // gris medio
+      light: '#BDBDBD',     // gris claro
+      dark: '#616161',      // gris oscuro
       contrastText: '#FFFFFF',
+      lighter: '#E0E0E0',   // gris muy claro
+      darker: '#424242',    // gris muy oscuro
     },
     info: {
       lighter: '#CAFDF5',

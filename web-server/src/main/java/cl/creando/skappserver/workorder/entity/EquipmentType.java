@@ -21,7 +21,7 @@ public class EquipmentType {
     @Id
     @GeneratedValue
     @UuidGenerator(style = TIME)
-    private UUID equipmentId;
+    private UUID equipmentTypeId;
     private String typeName;
 
     @JsonIgnore

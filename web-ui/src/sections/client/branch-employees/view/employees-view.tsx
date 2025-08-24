@@ -1,26 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Button, TextField, Stack, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
+import {
+  Container,
+  Button,
+  TextField,
+  Stack,
+  Typography,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+} from '@mui/material';
 import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
-import { viewUser, updateUser, createUserClient, deleteUser } from 'src/api/userCrudApi';
+import {
+  viewUser,
+  updateUser,
+  createUserClient,
+  deleteUser,
+} from 'src/api/userCrudApi';
 
 export default function UserView() {
   const { userId, branchId, clientId } = useParams();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
 
-
-  const [userData, setUserData] = useState<{firstName:string, lastName:string,email:string }>();
+  const [userData, setUserData] = useState<{ firstName: string; lastName: string; email: string }>();
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [creating, setCreating] = useState(userId === 'new');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // State for password
-  const [confirmPassword, setConfirmPassword] = useState(''); // State for confirming password
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [emailError, setEmailError] = useState(false);
 
   useEffect(() => {
     if (creating) {
@@ -30,7 +47,7 @@ export default function UserView() {
 
     const fetchUserData = async () => {
       try {
-        if(userId){
+        if (userId) {
           const response = await viewUser(userId);
           setUserData(response.data);
           setFirstName(response.data.firstName);
@@ -53,6 +70,13 @@ export default function UserView() {
 
   const handleSave = async () => {
     try {
+      if (!email.trim()) {
+        setEmailError(true);
+        showMessage('Email is required', 'error');
+        return;
+      }
+      setEmailError(false);
+
       if (creating) {
         if (password !== confirmPassword) {
           showMessage('Passwords do not match', 'error');
@@ -63,18 +87,18 @@ export default function UserView() {
           lastName,
           email,
           clientId,
-          branchId
+          branchId,
         };
         await createUserClient(newUser);
         showMessage('User created successfully', 'success');
         navigate(`/home/client/${clientId}/branch/${branchId}/employees`);
       } else {
-        if(userId){
+        if (userId) {
           const updatedUser = {
             firstName,
             lastName,
             email,
-            ...(password && { password }) // Include password only if it's provided
+            ...(password && { password }),
           };
           await updateUser(userId, updatedUser);
           setUserData({ ...userData, firstName, lastName, email });
@@ -82,8 +106,11 @@ export default function UserView() {
         }
       }
       setEditing(false);
-    } catch (error) {
-      showMessage('Failed to save user', 'error');
+    } catch (error:any) {
+            showMessage(
+        error.response?.data?.message ?? 'Failed to save user',
+        'error'
+      );
     }
   };
 
@@ -92,7 +119,7 @@ export default function UserView() {
     if (creating) {
       navigate(`/home/client/${clientId}/branch/${branchId}/employees`);
     } else {
-      if(userData){
+      if (userData) {
         setFirstName(userData.firstName);
         setLastName(userData.lastName);
         setEmail(userData.email);
@@ -104,7 +131,7 @@ export default function UserView() {
 
   const handleDelete = async () => {
     try {
-      if(userId){
+      if (userId) {
         await deleteUser(userId);
         showMessage('User deleted successfully', 'success');
         navigate(`/home/client/${clientId}/branch/${branchId}/employees`);
@@ -124,7 +151,7 @@ export default function UserView() {
     setDeleteConfirmationText('');
   };
 
-  const handleConfirmTextChange = (event:any) => {
+  const handleConfirmTextChange = (event: any) => {
     setDeleteConfirmationText(event.target.value);
   };
 
@@ -143,10 +170,10 @@ export default function UserView() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '70vh'
+          height: '70vh',
         }}
       >
-        <CircularProgress size={60} color="inherit"/>
+        <CircularProgress size={60} color="inherit" />
       </Box>
     );
   }
@@ -173,14 +200,20 @@ export default function UserView() {
               <Button variant="contained" color="primary" onClick={handleEdit}>
                 Edit User
               </Button>
-              <Button variant="contained" color="inherit" onClick={() => navigate(`/home/client/${clientId}/branch/${branchId}/employees`)}>
+              <Button
+                variant="contained"
+                color="inherit"
+                onClick={() =>
+                  navigate(`/home/client/${clientId}/branch/${branchId}/employees`)
+                }
+              >
                 Back to List
               </Button>
             </>
           )}
         </Stack>
       </Stack>
-    
+
       <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 300 }}>
         <TextField
           label="First Name"
@@ -205,6 +238,9 @@ export default function UserView() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
+          required
+          error={emailError}
+          helperText={emailError ? 'Email is required' : ''}
         />
         {editing && !creating && (
           <TextField
@@ -219,12 +255,7 @@ export default function UserView() {
       </Box>
 
       {/* Confirmation Dialog */}
-      <Dialog 
-        maxWidth="xs"
-        fullWidth
-        open={openConfirmDialog}
-        onClose={handleCloseConfirmDialog}
-      >
+      <Dialog maxWidth="xs" fullWidth open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <Typography>Type "delete" to confirm deletion:</Typography>
@@ -240,7 +271,9 @@ export default function UserView() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmDialog}>Cancel</Button>
-          <Button onClick={handleConfirmDelete} color="error">Delete</Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

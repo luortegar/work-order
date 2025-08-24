@@ -14,6 +14,8 @@ public class EquipmentResponse {
     private String equipmentBrand;
     private String serialNumber;
     private String equipmentType;
+    private UUID equipmentTypeId;
+    private UUID branchId;
 
     public EquipmentResponse(Equipment equipment) {
         this.equipmentId = equipment.getEquipmentId();
@@ -22,6 +24,10 @@ public class EquipmentResponse {
         this.serialNumber = equipment.getSerialNumber();
         if (equipment.getEquipmentType() != null) {
             this.equipmentType = equipment.getEquipmentType().getTypeName();
+            this.equipmentTypeId = equipment.getEquipmentType().getEquipmentTypeId();
+        }
+        if(equipment.getBranch()!= null){
+            this.branchId = equipment.getBranch().getBranchId();
         }
     }
 }

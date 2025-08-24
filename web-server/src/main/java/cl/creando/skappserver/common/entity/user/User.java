@@ -2,6 +2,8 @@ package cl.creando.skappserver.common.entity.user;
 
 import cl.creando.skappserver.common.entity.common.AuditableEntity;
 import cl.creando.skappserver.common.entity.common.File;
+import cl.creando.skappserver.workorder.entity.UserBranch;
+import cl.creando.skappserver.workorder.entity.UserClient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -71,6 +73,17 @@ public class User extends AuditableEntity implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<Notification> notifications;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<UserClient> userClientList;
+
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<UserBranch> userBranchList;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

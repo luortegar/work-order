@@ -7,19 +7,26 @@ import cl.creando.skappserver.workorder.entity.Client;
 import cl.creando.skappserver.workorder.repository.BranchRepository;
 import cl.creando.skappserver.workorder.repository.ClientRepository;
 import cl.creando.skappserver.workorder.request.BranchRequest;
+import cl.creando.skappserver.workorder.response.BranchAutocompleteResponse;
 import cl.creando.skappserver.workorder.response.BranchResponse;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -33,11 +40,11 @@ public class BranchService {
         Client client = clientRepository.findById(clientId).orElseThrow(() -> new SKException("Client not found.", HttpStatus.NOT_FOUND));
         Specification<Branch> specification = ((root, query, criteriaBuilder) -> {
             Predicate predicateOr = criteriaBuilder.or(
+
                     criteriaBuilder.like(root.get("branchId").as(String.class), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(root.get("branchName"), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(root.get("address"), CommonFunctions.getPattern(searchTerm)),
-                    criteriaBuilder.like(root.get("commune"), CommonFunctions.getPattern(searchTerm)),
-                    criteriaBuilder.like(root.get("region"), CommonFunctions.getPattern(searchTerm))
+                    criteriaBuilder.like(root.get("commune"), CommonFunctions.getPattern(searchTerm))
             );
             return criteriaBuilder.and(predicateOr, criteriaBuilder.equal(root.get("client"), client));
         });
@@ -75,4 +82,26 @@ public class BranchService {
         branchRepository.delete(branch);
         return new BranchResponse(branch);
     }
+
+    public List<BranchAutocompleteResponse> autocomplete(String searchTerm) {
+        Specification<Branch> specification = (root, query, cb) -> {
+            Join<Branch, Client> clientJoin = root.join("client", JoinType.LEFT);
+
+            String pattern = CommonFunctions.getPattern(searchTerm.trim());
+
+            return cb.or(
+                    cb.like(cb.lower(root.get("branchId").as(String.class)), pattern.toLowerCase()),
+                    cb.like(cb.lower(root.get("branchName")), pattern.toLowerCase()),
+                    cb.like(cb.lower(root.get("address")), pattern.toLowerCase()),
+                    cb.like(cb.lower(clientJoin.get("companyName")), pattern.toLowerCase())
+            );
+        };
+
+        Pageable limit = PageRequest.of(0, 10); // Solo 10 resultados
+
+        List<Branch> branches = branchRepository.findAll(specification, limit).getContent();
+
+        return branches.stream().map(BranchAutocompleteResponse::new).toList();
+    }
+
 }

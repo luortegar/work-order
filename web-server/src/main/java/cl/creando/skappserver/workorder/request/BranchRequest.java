@@ -13,13 +13,11 @@ public class BranchRequest {
     private String branchName;
     private String address;
     private String commune;
-    private String region;
     private UUID clientId;
 
     public void setValues(Branch branch) {
         branch.setBranchName(this.branchName);
         branch.setAddress(this.address);
         branch.setCommune(this.commune);
-        branch.setRegion(this.region);
     }
 }

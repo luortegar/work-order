@@ -14,13 +14,11 @@ public class BranchResponse {
     private String branchName;
     private String address;
     private String commune;
-    private String region;
 
     public BranchResponse(Branch branch) {
         this.branchId = branch.getBranchId();
         this.branchName = branch.getBranchName();
         this.address = branch.getAddress();
         this.commune = branch.getCommune();
-        this.region = branch.getRegion();
     }
 }

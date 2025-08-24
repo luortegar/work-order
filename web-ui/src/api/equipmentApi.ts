@@ -1,4 +1,5 @@
 import axios from './axiosInstance'
+import { EquipmentAutocompleteResponse, EquipmentTypeResponse } from './types/equitmentTypes';
 
 export const viewEquipment = async (id: string) =>
     axios.get(`/private/v1/equipments/${id}`)
@@ -14,3 +15,12 @@ export const updateEquipment = async (id: string, payload: any) =>
 
 export const deleteEquipmentById = async (id: string) => 
     axios.delete(`/private/v1/equipments/${id}`)
+
+export const autocompleteEquipmentType = async (searchTerm : string = ''): Promise<EquipmentTypeResponse[]> =>{
+    const {data} = await axios.get<EquipmentTypeResponse[]>(`/private/v1/equipments/equipment-type/autocomplete?searchTerm=${searchTerm}`)
+    return data;
+}
+export const autocompleteEquipmentAndFilterByBranchId = async (branchId : string, searchTerm : string = ''): Promise<EquipmentAutocompleteResponse[]> =>{
+    const {data} =  await axios.get<EquipmentAutocompleteResponse[]>(`/private/v1/equipments/branch-offices/${branchId}/autoComplete?searchTerm=${searchTerm}`);
+    return data;
+}

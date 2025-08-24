@@ -6,7 +6,7 @@ import { Container, Chip, Button } from '@mui/material';
 import { listBranch } from 'src/api/branchApi';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import {Iconify} from 'src/components/iconify';
+import { Iconify } from 'src/components/iconify';
 import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
 import { listBranchUser } from 'src/api/userCrudApi';
 
@@ -19,20 +19,20 @@ export default function EmployeesList() {
 
   const columns: GridColDef[] = [
     {
-        hideable: false,
-        field: 'userId',
-        headerName: 'User ID',
-        width: 200,
-        flex: 0.5,
-        renderCell: (params: GridRenderCellParams) => (
-          <Chip
-            label={params.value}
-            color='default'
-            variant='outlined'
-            size='small'
-            onClick={() => navigate(`/home/client/${clientId}/branch/${branchId}/employees/${params.row.userId}`)}
-          />
-        ),
+      hideable: false,
+      field: 'userId',
+      headerName: 'User ID',
+      width: 200,
+      flex: 0.5,
+      renderCell: (params: GridRenderCellParams) => (
+        <Chip
+          label={params.value}
+          color='default'
+          variant='outlined'
+          size='small'
+          onClick={() => navigate(`/home/client/${clientId}/branch/${branchId}/employees/${params.row.userId}`)}
+        />
+      ),
     },
     { field: 'firstName', headerName: 'First Name', width: 200, flex: 0.5 },
     { field: 'lastName', headerName: 'Last Name', width: 200, flex: 0.5 },
@@ -46,8 +46,8 @@ export default function EmployeesList() {
     refreshData(5, 0, '', '');
   }, []);
 
-  const refreshData = (rowsPerPage:number, page:number, sort:string, filterName:string) => {
-    if(branchId){
+  const refreshData = (rowsPerPage: number, page: number, sort: string, filterName: string) => {
+    if (branchId) {
       listBranchUser(branchId, rowsPerPage, page, sort, filterName).then((r) => {
         setDataList(r.data.content);
         setRowCount(r.data.totalElements);
@@ -59,14 +59,14 @@ export default function EmployeesList() {
   return (
     <Container maxWidth="xl">
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h4">Client employees</Typography>
+        <Typography variant="h4">Branch employees</Typography>
         <Button
           variant="contained"
           color="inherit"
-          startIcon={<Iconify icon="eva:checkmark-fill" />}
+          startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={() => navigate(`/home/client/${clientId}/branch/${branchId}/employees/new`)}
         >
-         Add new employee
+          Add new employee
         </Button>
       </Stack>
       <SimpleTable columns={columns} refreshData={refreshData} dataList={dataList} rowCount={rowCount} getRowId={(row) => row.userId} pageSizeDefault={0} />

@@ -40,4 +40,14 @@ public class EquipmentController {
     public ResponseEntity<?> delete(@PathVariable(name = "id") UUID roleId) {
         return ResponseEntity.ok(equipmentService.delete(roleId));
     }
+
+    @GetMapping("equipment-type/autocomplete")
+    public ResponseEntity<?> autoCompleteEquipmentType(@RequestParam(name = "searchTerm", required = false, defaultValue = "") String searchTerm) {
+        return ResponseEntity.ok(equipmentService.autoCompleteEquipmentType(searchTerm));
+    }
+
+    @GetMapping("/branch-offices/{branchId}/autoComplete")
+    public ResponseEntity<?> autoCompleteEquipment(@PathVariable(name = "branchId") UUID branchId, @RequestParam(name = "searchTerm", required = false, defaultValue = "") String searchTerm) {
+        return ResponseEntity.ok(equipmentService.autoCompleteEquipment(branchId, searchTerm));
+    }
 }

@@ -96,7 +96,7 @@ export default function BranchList() {
         <Button
           variant="contained"
           color="inherit"
-          startIcon={<Iconify width={24} icon="socials:github" sx={{ '--color': 'white' }} />}
+          startIcon={<Iconify width={24} icon="mingcute:add-line" sx={{ '--color': 'white' }} />}
           onClick={() => navigate(`/home/client/${clientId}/branch/new`)}
         >
           New branch

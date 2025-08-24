@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Iconify } from 'src/components/iconify';
 import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
+import { ClientResponse } from 'src/api/types/clientTypes';
 
 export default function ClientList() {
   const { showMessage } = useSnackbar();
@@ -73,7 +74,7 @@ export default function ClientList() {
     { field: 'typeOfPurchase', headerName: 'Type of Purchase', width: 300, flex: 1 },
   ];
 
-  const [dataList, setDataList] = useState([]);
+  const [dataList, setDataList] = useState<ClientResponse[]>([]);
   const [rowCount, setRowCount] = useState(0);
 
   useEffect(() => {
@@ -82,8 +83,8 @@ export default function ClientList() {
 
   const refreshData = (rowsPerPage:number, page:number, sort:string, filterName:string) => {
     list(rowsPerPage, page, sort, filterName).then((r) => {
-      setDataList(r.data.content);
-      setRowCount(r.data.totalElements);
+      setDataList(r.content);
+      setRowCount(r.totalElements);
       console.log(r);
     });
   };
@@ -96,7 +97,7 @@ export default function ClientList() {
         <Button
           variant="contained"
           color="inherit"
-          startIcon={<Iconify icon="eva:trending-down-fill" />}
+          startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={() => navigate(`/home/client/new`)}
         >
           New client

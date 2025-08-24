@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Button, TextField, Stack, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
+import { Container, Button, TextField, Stack, Typography, Box, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Autocomplete } from '@mui/material';
 import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
-import { viewEquipment, updateEquipment, createEquipment, deleteEquipmentById } from 'src/api/equipmentApi';
+import { viewEquipment, updateEquipment, createEquipment, deleteEquipmentById, autocompleteEquipmentType } from 'src/api/equipmentApi';
+import { EquipmentTypeResponse } from 'src/api/types/equitmentTypes';
 
 export default function EquipmentView() {
   const {clientId, branchId, equipmentId } = useParams();
@@ -14,13 +15,16 @@ export default function EquipmentView() {
     equipmentModel: '',
     equipmentBrand: '',
     serialNumber: '',
-    equipmentType: ''
+    equipmentTypeId:'',
+    equipmentType: '',
+    branchId: branchId
   });
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [creating] = useState(equipmentId === 'new');
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [equipmentTypeOptions, setEquipmentTypeOptions] = useState<EquipmentTypeResponse[]>([]);
 
   useEffect(() => {
     if (creating) {
@@ -44,6 +48,12 @@ export default function EquipmentView() {
     fetchData();
   }, [equipmentId, creating, showMessage]);
 
+    const fetchEquipmentTypeOptions = useCallback((input: string) => {
+      autocompleteEquipmentType(input)
+        .then(res => setEquipmentTypeOptions(res))
+        .catch(() => showMessage('Failed to load equipment type options', 'error'));
+    }, [showMessage]);
+
   const handleEdit = () => {
     setEditing(true);
   };
@@ -55,6 +65,7 @@ export default function EquipmentView() {
         showMessage('Created successfully.', 'success');
       } else {
         if(equipmentId){
+          console.log("save data______",data)
           await updateEquipment(equipmentId, data);
           showMessage('Updated successfully.', 'success');
         }
@@ -132,6 +143,13 @@ export default function EquipmentView() {
     );
   }
 
+  const handleEquipmentTypeChange = (event: any, newValue: any) => {
+    setData(prevData => ({
+      ...prevData,
+      equipmentTypeId: newValue ? newValue.equipmentTypeId || newValue : ''
+    }));
+  };
+
   return (
     <Container maxWidth="xl">
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
@@ -142,13 +160,13 @@ export default function EquipmentView() {
               <Button variant="contained" color="primary" onClick={handleSave}>
                 {creating ? 'Create' : 'Save'}
               </Button>
-              <Button variant="outlined" color="secondary" onClick={handleCancel}>
+              <Button variant="contained" color="secondary" onClick={handleCancel}>
                 Cancel
               </Button>
             </>
           ) : (
             <>
-              <Button variant="outlined" color="error" onClick={handleOpenConfirmDialog}>
+              <Button variant="contained" color="error" onClick={handleOpenConfirmDialog}>
                 Delete
               </Button>
               <Button variant="contained" color="primary" onClick={handleEdit}>
@@ -190,15 +208,26 @@ export default function EquipmentView() {
           fullWidth
           disabled={!editing && !creating}
         />
-        <TextField
-          label="Equipment Type"
-          name="equipmentType"
-          value={data.equipmentType}
-          onChange={handleChange}
-          variant="outlined"
-          fullWidth
+        <Autocomplete
+          options={equipmentTypeOptions}
+          getOptionLabel={(option) =>
+            typeof option === 'string' ? option : option.typeName
+          }
+          value={equipmentTypeOptions.find(option => option.equipmentTypeId == data.equipmentTypeId) || data.equipmentType}
+          onChange={handleEquipmentTypeChange}
+          onInputChange={(event, newInputValue) => fetchEquipmentTypeOptions(newInputValue)}
+          freeSolo
           disabled={!editing && !creating}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Equipment type"
+              variant="outlined"
+              fullWidth
+            />
+          )}
         />
+
       </Box>
 
       <Dialog

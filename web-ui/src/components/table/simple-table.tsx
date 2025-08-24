@@ -10,14 +10,13 @@ import {
 import {
   GridColDef,
   DataGrid,
-  GridRowsProp,
   gridClasses,
 } from '@mui/x-data-grid';
 import Scrollbar from 'src/components/scrollbar-old';
 
 interface ISimpleTableProps {
   columns: GridColDef[];
-  dataList: GridRowsProp[];
+  dataList: any[];
   rowCount: number;
   pageSizeDefault: number;
   refreshData: (
@@ -91,73 +90,73 @@ const SimpleTable: React.FC<ISimpleTableProps> = ({
           </Box>
 
           <div style={{ height: 500, width: '100%' }}>
-<DataGrid
-  disableRowSelectionOnClick
-  disableColumnSelector
-  rows={dataList}
-  columns={columns}
-  getRowId={getRowId}
-  pagination
-  sortingMode="server"
-  filterMode="server"
-  paginationMode="server"
-  onPaginationModelChange={(newPaginationModel) => {
-    refreshData(
-      newPaginationModel.pageSize,
-      newPaginationModel.page,
-      sort,
-      searchTerm
-    );
-    setPageSize(newPaginationModel.pageSize);
-    setPage(newPaginationModel.page);
-  }}
-  onSortModelChange={(newSortModel) => {
-    if (newSortModel?.[0]) {
-      const newSort = `${newSortModel?.[0].field},${newSortModel?.[0].sort}`;
-      refreshData(pageSize, page, newSort, searchTerm);
-      setSort(newSort);
-    } else {
-      refreshData(pageSize, page, '', searchTerm);
-      setSort('');
-    }
-  }}
-  rowCount={rowCount}
-  pageSizeOptions={[5, 10, 20, 50, 100]}
-  initialState={{
-    pagination: {
-      paginationModel: { pageSize: 5, page: 0 },
-    },
-  }}
-  disableColumnFilter
-  sx={{
-    border: 'none', // quita borde general
-    borderRadius: 2,
-    backgroundColor: theme.palette.background.paper,
-    [`& .${gridClasses.columnHeaders}`]: {
-      backgroundColor: theme.palette.grey[100],
-      color: theme.palette.text.secondary,
-      fontWeight: 'bold',
-      fontSize: 14,
-      borderBottom: 'none', // quita línea inferior del header
-    },
-    [`& .${gridClasses.cell}`]: {
-      borderBottom: `1px solid ${theme.palette.divider}`,
-    },
-    [`& .${gridClasses.footerContainer}`]: {
-      borderTop: 'none', // quita línea superior del footer (paginación)
-    },
-    [`& .${gridClasses.virtualScroller}`]: {
-      borderLeft: 'none', // quita borde lateral izquierdo
-      borderRight: 'none', // quita borde lateral derecho
-    },
-    [`& .${gridClasses.row}:hover`]: {
-      backgroundColor: theme.palette.action.hover,
-    },
-        [`& .${gridClasses.columnSeparator}`]: {
-      display: 'none',
-    },
-  }}
-/>
+            <DataGrid
+              disableRowSelectionOnClick
+              disableColumnSelector
+              rows={dataList}
+              columns={columns}
+              getRowId={getRowId}
+              pagination
+              sortingMode="server"
+              filterMode="server"
+              paginationMode="server"
+              onPaginationModelChange={(newPaginationModel) => {
+                refreshData(
+                  newPaginationModel.pageSize,
+                  newPaginationModel.page,
+                  sort,
+                  searchTerm
+                );
+                setPageSize(newPaginationModel.pageSize);
+                setPage(newPaginationModel.page);
+              }}
+              onSortModelChange={(newSortModel) => {
+                if (newSortModel?.[0]) {
+                  const newSort = `${newSortModel?.[0].field},${newSortModel?.[0].sort}`;
+                  refreshData(pageSize, page, newSort, searchTerm);
+                  setSort(newSort);
+                } else {
+                  refreshData(pageSize, page, '', searchTerm);
+                  setSort('');
+                }
+              }}
+              rowCount={rowCount}
+              pageSizeOptions={[5, 10, 20, 50, 100]}
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 5, page: 0 },
+                },
+              }}
+              disableColumnFilter
+              sx={{
+                border: 'none', // quita borde general
+                borderRadius: 2,
+                backgroundColor: theme.palette.background.paper,
+                [`& .${gridClasses.columnHeaders}`]: {
+                  backgroundColor: theme.palette.grey[100],
+                  color: theme.palette.text.secondary,
+                  fontWeight: 'bold',
+                  fontSize: 14,
+                  borderBottom: 'none', // quita línea inferior del header
+                },
+                [`& .${gridClasses.cell}`]: {
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                },
+                [`& .${gridClasses.footerContainer}`]: {
+                  borderTop: 'none', // quita línea superior del footer (paginación)
+                },
+                [`& .${gridClasses.virtualScroller}`]: {
+                  borderLeft: 'none', // quita borde lateral izquierdo
+                  borderRight: 'none', // quita borde lateral derecho
+                },
+                [`& .${gridClasses.row}:hover`]: {
+                  backgroundColor: theme.palette.action.hover,
+                },
+                [`& .${gridClasses.columnSeparator}`]: {
+                  display: 'none',
+                },
+              }}
+            />
 
           </div>
         </TableContainer>

@@ -40,4 +40,9 @@ public class BranchController {
     public ResponseEntity<?> delete(@PathVariable(name = "id") UUID id) {
         return ResponseEntity.ok(branchService.delete(id));
     }
+
+    @GetMapping("/autocomplete")
+    public ResponseEntity<?> autocomplete(@RequestParam(name = "searchTerm", required = false, defaultValue = "") String searchTerm) {
+        return ResponseEntity.ok(branchService.autocomplete(searchTerm));
+    }
 }

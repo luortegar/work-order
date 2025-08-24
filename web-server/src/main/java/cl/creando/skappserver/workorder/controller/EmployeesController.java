@@ -46,4 +46,9 @@ public class EmployeesController {
     public ResponseEntity<?> delete(@PathVariable(name = "id") UUID id) {
         return ResponseEntity.ok(userService.delete(id));
     }
+
+    @GetMapping("/branch/{branchId}/autocomplete")
+    public ResponseEntity<?> autocomplete(@PathVariable(name = "branchId") UUID branchId, @RequestParam(name = "searchTerm", required = false, defaultValue = "") String searchTerm) {
+        return ResponseEntity.ok(userService.autocomplete(branchId, searchTerm));
+    }
 }

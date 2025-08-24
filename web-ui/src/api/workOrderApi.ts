@@ -1,7 +1,10 @@
 import axios from './axiosInstance'
+import { DetailedWorkOrderResponse } from './types/workOrderTypes';
 
-export const view = async (id: string) =>
-    axios.get(`/private/v1/work-orders/${id}`)
+export const view = async (id: string):Promise<DetailedWorkOrderResponse> => {
+    const {data} = await axios.get<DetailedWorkOrderResponse>(`/private/v1/work-orders/${id}`)
+    return data;
+}
 
 export const list = async (size : number = 10, page : number = 0, sort : string = '', searchTerm : string = '') => 
     axios.get(`/private/v1/work-orders?size=${size}&page=${page}&sort=${sort}&searchTerm=${searchTerm}`)

@@ -75,23 +75,24 @@ VALUES ('7f000001-88ea-1791-8188-eab8dc0c0003', 'Medicina Integral SpA', '77.234
 INSERT INTO tbl_client (client_id, company_name, unique_taxpayer_identification, business, address, commune, city, type_of_purchase)
 VALUES ('7f000001-88ea-1791-8188-eab8dc0c0004', 'Transporte Express Limitada', '79.987.654-3', 'Transporte y Logística', 'Av. Las Industrias 980', 'Quilicura', 'Santiago', 'DEL_GIRO');
 
-INSERT INTO tbl_branch (id_branch, branch_name, address, commune, region, client_id)
-VALUES ('7f000001-88ea-1791-8188-eab8dc0d0000', 'Sucursal Providencia', 'Av. Providencia 1250', 'Providencia', 'Región Metropolitana', '7f000001-88ea-1791-8188-eab8dc0c0000');
-INSERT INTO tbl_branch (id_branch, branch_name, address, commune, region, client_id)
-VALUES ('7f000001-88ea-1791-8188-eab8dc0d0001', 'Sucursal Maipú', 'Camino a Melipilla Km 14', 'Maipú', 'Región Metropolitana', '7f000001-88ea-1791-8188-eab8dc0c0001');
-INSERT INTO tbl_branch (id_branch, branch_name, address, commune, region, client_id)
-VALUES ('7f000001-88ea-1791-8188-eab8dc0d0002', 'Sucursal San Fernando', 'Ruta 5 Sur Km 322', 'San Fernando', 'Región de O’Higgins', '7f000001-88ea-1791-8188-eab8dc0c0002');
-INSERT INTO tbl_branch (id_branch, branch_name, address, commune, region, client_id)
-VALUES ('7f000001-88ea-1791-8188-eab8dc0d0003', 'Sucursal La Florida', 'Av. La Florida 4520', 'La Florida', 'Región Metropolitana', '7f000001-88ea-1791-8188-eab8dc0c0003');
-INSERT INTO tbl_branch (id_branch, branch_name, address, commune, region, client_id) VALUES ('7f000001-88ea-1791-8188-eab8dc0d0004', 'Sucursal Quilicura', 'Av. Las Industrias 990', 'Quilicura', 'Región Metropolitana', '7f000001-88ea-1791-8188-eab8dc0c0004');
+INSERT INTO tbl_branch (id_branch, branch_name, address, commune, client_id)
+VALUES ('7f000001-88ea-1791-8188-eab8dc0d0000', 'Sucursal Providencia', 'Av. Providencia 1250', 'Providencia',  '7f000001-88ea-1791-8188-eab8dc0c0000');
+INSERT INTO tbl_branch (id_branch, branch_name, address, commune, client_id)
+VALUES ('7f000001-88ea-1791-8188-eab8dc0d0001', 'Sucursal Maipú', 'Camino a Melipilla Km 14', 'Maipú', '7f000001-88ea-1791-8188-eab8dc0c0001');
+INSERT INTO tbl_branch (id_branch, branch_name, address, commune, client_id)
+VALUES ('7f000001-88ea-1791-8188-eab8dc0d0002', 'Sucursal San Fernando', 'Ruta 5 Sur Km 322', 'San Fernando', '7f000001-88ea-1791-8188-eab8dc0c0002');
+INSERT INTO tbl_branch (id_branch, branch_name, address, commune, client_id)
+VALUES ('7f000001-88ea-1791-8188-eab8dc0d0003', 'Sucursal La Florida', 'Av. La Florida 4520', 'La Florida', '7f000001-88ea-1791-8188-eab8dc0c0003');
+INSERT INTO tbl_branch (id_branch, branch_name, address, commune, client_id)
+VALUES ('7f000001-88ea-1791-8188-eab8dc0d0004', 'Sucursal Quilicura', 'Av. Las Industrias 990', 'Quilicura', '7f000001-88ea-1791-8188-eab8dc0c0004');
 
-INSERT INTO tbl_equipment_type (equipment_id, type_name)
+INSERT INTO tbl_equipment_type (equipment_type_id, type_name)
 VALUES ('7f000001-88ea-1791-8188-eab8dc0e0000', 'Equipo de Rayos X Digital');
-INSERT INTO tbl_equipment_type (equipment_id, type_name)
+INSERT INTO tbl_equipment_type (equipment_type_id, type_name)
 VALUES ('7f000001-88ea-1791-8188-eab8dc0e0001', 'Tomógrafo Computarizado (CT Scan)');
-INSERT INTO tbl_equipment_type (equipment_id, type_name)
+INSERT INTO tbl_equipment_type (equipment_type_id, type_name)
 VALUES ('7f000001-88ea-1791-8188-eab8dc0e0002', 'Resonador Magnético (MRI)');
-INSERT INTO tbl_equipment_type (equipment_id, type_name)
+INSERT INTO tbl_equipment_type (equipment_type_id, type_name)
 VALUES ('7f000001-88ea-1791-8188-eab8dc0e0003', 'Ecógrafo Portátil');
 
 INSERT INTO tbl_equipment (equipment_id, equipment_model, equipment_brand, serial_number, equipment_type_id, branch_id)

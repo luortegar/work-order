@@ -27,7 +27,7 @@ export const navData = [
   },
   {
     title: 'Work order',
-    path: '/work-order',
+    path: '/home/work-order',
     icon: icon('ic-work-order'),
   },
   {

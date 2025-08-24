@@ -15,7 +15,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 export const DashboardPage = lazy(() => import('src/pages/dashboard'));
 export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
-export const WorkOrder = lazy(() => import('src/pages/work-order'));
+export const WorkOrderPage = lazy(() => import('src/pages/work-order'));
 export const ClientPage = lazy(() => import('src/pages/client-page'));
 
 
@@ -56,7 +56,7 @@ export const routesSection: RouteObject[] = [
     ),
     children: [
       { path: 'home', element: <DashboardPage /> },
-      { path: 'work-order', element: <WorkOrder /> },
+      { path: 'home/work-order/*', element: <WorkOrderPage /> },
       { path: 'home/client/*', element: <ClientPage /> },
 
       { path: 'user', element: <UserPage /> },

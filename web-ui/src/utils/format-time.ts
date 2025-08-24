@@ -90,3 +90,14 @@ export function fToNow(date: DatePickerFormat): string {
 
   return dayjs(date).toNow(true);
 }
+
+// Helper function to convert API date array to JavaScript Date object
+export const convertArrayToDate = (dateArray:any) : Date|null => {
+  if (Array.isArray(dateArray)) {
+    const [year, month, day, hour, minute, second] = dateArray;
+    // Create a new Date object from the provided date array
+    // Note: month is zero-indexed, so it's correct to use it as-is
+    return new Date(year, month-1, day, hour, minute, second);
+  }
+  return null;
+};

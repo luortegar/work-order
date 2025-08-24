@@ -63,7 +63,7 @@ export default function EquipmentList() {
         <Button
           variant="contained"
           color="inherit"
-          startIcon={<Iconify icon="carbon:chevron-sort" />}
+          startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={() => navigate(`/home/client/${clientId}/branch/${branchId}/equipment/new`)}
         >
           New Equipment

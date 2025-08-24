@@ -28,6 +28,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -168,6 +169,15 @@ public class UserOtService {
                 .orElseThrow(() -> new SKException("Client not found.", HttpStatus.NOT_FOUND));
 
 
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(u -> {
+                    throw new SKException(
+                            String.format("There is already a user with this email (%s) address.",
+                                    request.getEmail()),
+                            HttpStatus.BAD_REQUEST
+                    );
+                });
+
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -209,5 +219,28 @@ public class UserOtService {
         Page<User> all = userRepository.findAll(specification, pageable);
         List<UserResponse> list = all.map(UserResponse::new).stream().toList();
         return new PageImpl<>(list, all.getPageable(), all.getTotalElements());
+    }
+
+    public Object autocomplete(UUID branchId, String searchTerm) {
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() -> new SKException("Branch not found.", HttpStatus.NOT_FOUND));
+        Client client = branch.getClient();
+
+        Specification<User> specification = (root, query, criteriaBuilder) -> {
+            Join<User, UserBranch> userClientJoin = root.join("userBranchList", JoinType.INNER);
+            Predicate searchPredicate = criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), CommonFunctions.getPattern(searchTerm))
+            );
+
+            Predicate clientPredicate = criteriaBuilder.equal(userClientJoin.get("branch"), branch);
+
+            return criteriaBuilder.and(searchPredicate, clientPredicate);
+        };
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<User> all = userRepository.findAll(specification, pageable);
+        return all.map(UserResponse::new).stream().toList();
     }
 }

@@ -63,7 +63,7 @@ export default function EmployeesList() {
         <Button
           variant="contained"
           color="inherit"
-          startIcon={<Iconify icon="eva:done-all-fill" />}
+          startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={() => navigate(`/home/client/${clientId}/employees/new`)}
         >
          Add new employee

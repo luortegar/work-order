@@ -5,9 +5,8 @@ import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
 import { viewBranch, updateBranch, createBranch, deleteBranchById } from 'src/api/branchApi';
 import { autocompleteCommune, CommuneResponse } from 'src/api/addressApi';
 
-
 export default function BranchView() {
-  const {clientId, branchId } = useParams();
+  const { clientId, branchId } = useParams();
   const navigate = useNavigate();
   const { showMessage } = useSnackbar();
 
@@ -16,7 +15,6 @@ export default function BranchView() {
     branchName: '',
     address: '',
     commune: '',
-    region: '',
     clientId: clientId
   });
   const [loading, setLoading] = useState(true);
@@ -24,7 +22,10 @@ export default function BranchView() {
   const [creating] = useState(branchId === 'new');
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
-  const [communeOptions, setCommuneOptions] =  useState<CommuneResponse[]>([]);
+  const [communeOptions, setCommuneOptions] = useState<CommuneResponse[]>([]);
+
+  // ✅ errores de validación
+  const [errors, setErrors] = useState<{ branchName: boolean }>({ branchName: false });
 
   useEffect(() => {
     if (creating) {
@@ -34,7 +35,7 @@ export default function BranchView() {
 
     const fetchData = async () => {
       try {
-        if(branchId){
+        if (branchId) {
           const response = await viewBranch(branchId);
           setData(response.data);
           setLoading(false);
@@ -48,7 +49,7 @@ export default function BranchView() {
     fetchData();
   }, [branchId, creating, showMessage]);
 
-  const fetchCommuneOptions = async (input:string) => {
+  const fetchCommuneOptions = async (input: string) => {
     try {
       const response = await autocompleteCommune(input);
       setCommuneOptions(response.data);
@@ -62,14 +63,25 @@ export default function BranchView() {
   };
 
   const handleSave = async () => {
+    // ✅ validación obligatoria
+    const newErrors = {
+      branchName: !data.branchName.trim(),
+    };
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some(Boolean)) {
+      showMessage('Please fill all required fields', 'error');
+      return;
+    }
+
     try {
       if (creating) {
         await createBranch(data);
         showMessage('Created successfully.', 'success');
       } else {
-        if(branchId){
-        await updateBranch(branchId, data);
-        showMessage('Updated successfully.', 'success');
+        if (branchId) {
+          await updateBranch(branchId, data);
+          showMessage('Updated successfully.', 'success');
         }
       }
       setEditing(false);
@@ -83,17 +95,15 @@ export default function BranchView() {
     setEditing(false);
     if (creating) {
       navigate(`/home/client/${clientId}/branch`);
-    } else {
-      setData(data); // Reset to original values
     }
   };
 
   const handleDelete = async () => {
     try {
-      if(branchId){
-      await deleteBranchById(branchId);
-      showMessage('Deleted successfully.', 'success');
-      navigate(`/home/client/${clientId}/branch`);
+      if (branchId) {
+        await deleteBranchById(branchId);
+        showMessage('Deleted successfully.', 'success');
+        navigate(`/home/client/${clientId}/branch`);
       }
     } catch (error) {
       showMessage('Failed to delete.', 'error');
@@ -110,7 +120,7 @@ export default function BranchView() {
     setDeleteConfirmationText('');
   };
 
-  const handleConfirmTextChange = (event:any) => {
+  const handleConfirmTextChange = (event: any) => {
     setDeleteConfirmationText(event.target.value);
   };
 
@@ -122,15 +132,19 @@ export default function BranchView() {
     }
   };
 
-  const handleChange = (event:any) => {
+  const handleChange = (event: any) => {
     const { name, value } = event.target;
     setData(prevData => ({
       ...prevData,
       [name]: value
     }));
+
+    if (name === 'branchName' && value.trim()) {
+      setErrors(prev => ({ ...prev, branchName: false }));
+    }
   };
 
-  const handleCommuneChange = (event:any, newValue:any) => {
+  const handleCommuneChange = (event: any, newValue: any) => {
     setData(prevData => ({
       ...prevData,
       commune: newValue ? newValue.commune || newValue : ''
@@ -162,7 +176,7 @@ export default function BranchView() {
               <Button variant="contained" color="primary" onClick={handleSave}>
                 {creating ? 'Create' : 'Save'}
               </Button>
-              <Button variant="outlined" color="secondary" onClick={handleCancel}>
+              <Button variant="contained" color="secondary" onClick={handleCancel}>
                 Cancel
               </Button>
             </>
@@ -184,13 +198,15 @@ export default function BranchView() {
 
       <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 300 }}>
         <TextField
-          label="Branch Name"
+          label="Branch Name *"
           name="branchName"
           value={data.branchName}
           onChange={handleChange}
           variant="outlined"
           fullWidth
           disabled={!editing && !creating}
+          error={errors.branchName}
+          helperText={errors.branchName && 'Branch Name is required'}
         />
         <TextField
           label="Address"
@@ -203,9 +219,9 @@ export default function BranchView() {
         />
         <Autocomplete
           options={communeOptions}
-            getOptionLabel={(option) =>
-              typeof option === 'string' ? option : option.commune
-            }
+          getOptionLabel={(option) =>
+            typeof option === 'string' ? option : option.commune
+          }
           value={communeOptions.find(option => option.commune === data.commune) || data.commune}
           onChange={handleCommuneChange}
           onInputChange={(event, newInputValue) => fetchCommuneOptions(newInputValue)}
@@ -219,15 +235,6 @@ export default function BranchView() {
               fullWidth
             />
           )}
-        />
-        <TextField
-          label="Region"
-          name="region"
-          value={data.region}
-          onChange={handleChange}
-          variant="outlined"
-          fullWidth
-          disabled={!editing && !creating}
         />
       </Box>
 
