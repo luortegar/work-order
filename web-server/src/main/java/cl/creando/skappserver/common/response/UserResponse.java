@@ -4,7 +4,9 @@ import cl.creando.skappserver.common.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Data
 public class UserResponse {
@@ -15,6 +17,7 @@ public class UserResponse {
     private String email;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String profilePictureUrl;
+    private List<UUID> roleIds;
 
     public UserResponse(User user, String host) {
 
@@ -30,6 +33,9 @@ public class UserResponse {
         this.lastName = user.getLastName();
         this.email = user.getEmail();
         this.fullName = user.getFirstName() + " " + user.getLastName();
+        if(user.getUserRoleList()!=null) {
+            this.roleIds = user.getUserRoleList().stream().map(ur -> ur.getRole().getRoleId()).toList();
+        }
     }
 
 }

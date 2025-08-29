@@ -42,4 +42,9 @@ public class RoleController {
         return roleService.delete(id);
     }
 
+    @GetMapping("/autocomplete")
+    public ResponseEntity<?> autocomplete(@RequestParam(name = "searchTerm", required = false, defaultValue = "") String searchTerm) {
+        return roleService.autocomplete(searchTerm);
+    }
+
 }

@@ -3,9 +3,13 @@ VALUES ('7f000001-88ea-1791-8188-eab8dc090000', 'Test_0', 'Duper', 'test@email.c
         '$2a$10$rnyh.E9fcfW1mSI9tiQ6L.sFXD3WAh7znN1/WAl9uEqxzCOO72pIK', true, null);
 
 INSERT INTO tbl_role (role_id, role_name)
-VALUES ('7f000001-88ea-1791-8188-eab8dc097001', 'Video Creator');
+VALUES ('7f000001-88ea-1791-8188-eab8dc099000', 'Super admin');
 INSERT INTO tbl_role (role_id, role_name)
-VALUES ('7f000001-88ea-1791-8188-eab8dc097002', 'Administrator & Video Creator');
+VALUES ('7f000001-88ea-1791-8188-eab8dc099001', 'Admin');
+INSERT INTO tbl_role (role_id, role_name)
+VALUES ('7f000001-88ea-1791-8188-eab8dc099002', 'Technician');
+INSERT INTO tbl_role (role_id, role_name)
+VALUES ('7f000001-88ea-1791-8188-eab8dc099003', 'External user');
 
 INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
 VALUES ('7f000001-88ea-1791-8188-eab8dc091000', 'List Role', 'LIST_ROLE');
@@ -18,16 +22,6 @@ VALUES ('7f000001-88ea-1791-8188-eab8dc091003', 'Edit Role', 'EDIT_ROLE');
 INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
 VALUES ('7f000001-88ea-1791-8188-eab8dc091004', 'Delete Role', 'DELETE_ROLE');
 
-INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
-VALUES ('7f000001-88ea-1791-8188-eab8dc092000', 'List Video', 'LIST_VIDEO');
-INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
-VALUES ('7f000001-88ea-1791-8188-eab8dc092001', 'View Video', 'VIEW_VIDEO');
-INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
-VALUES ('7f000001-88ea-1791-8188-eab8dc092002', 'Create Video', 'CREATE_VIDEO');
-INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
-VALUES ('7f000001-88ea-1791-8188-eab8dc092003', 'Edit Video', 'EDIT_VIDEO');
-INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
-VALUES ('7f000001-88ea-1791-8188-eab8dc092004', 'Delete Video', 'DELETE_VIDEO');
 
 INSERT INTO tbl_privilege (privilege_id, privilege_name, privilege_system_name)
 VALUES ('7f000001-88ea-1791-8188-eab8dc093000', 'List User', 'LIST_USER');
@@ -42,9 +36,9 @@ VALUES ('7f000001-88ea-1791-8188-eab8dc093004', 'Delete User', 'DELETE_USER');
 
 
 INSERT INTO tbl_role_privilege (role_privilege_id, role_id, privilege_id)
-VALUES ('7f000001-88ea-1791-8188-eab8dc099000', '7f000001-88ea-1791-8188-eab8dc097001', '7f000001-88ea-1791-8188-eab8dc091000');
+VALUES ('7f000001-88ea-1791-8188-eab8dc099000', '7f000001-88ea-1791-8188-eab8dc099000', '7f000001-88ea-1791-8188-eab8dc091000');
 INSERT INTO tbl_role_privilege (role_privilege_id, role_id, privilege_id)
-VALUES ('7f000001-88ea-1791-8188-eab8dc099001', '7f000001-88ea-1791-8188-eab8dc097001', '7f000001-88ea-1791-8188-eab8dc091000');
+VALUES ('7f000001-88ea-1791-8188-eab8dc099001', '7f000001-88ea-1791-8188-eab8dc099000', '7f000001-88ea-1791-8188-eab8dc091000');
 
 
 
@@ -59,7 +53,7 @@ VALUES ('7f000001-88ea-1791-8188-eab8dc098100', 'color', 'red', '7f000001-88ea-1
 
 INSERT INTO tbl_user_role (user_role_id, user_id, role_id, tenant_id, entity_status, is_default)
 VALUES ('7f000001-88ea-1791-8188-eab8dc096000', '7f000001-88ea-1791-8188-eab8dc090000',
-        '7f000001-88ea-1791-8188-eab8dc097001', '7f000001-88ea-1791-8188-eab8dc098000', 'ACTIVE', true);
+        '7f000001-88ea-1791-8188-eab8dc099000', '7f000001-88ea-1791-8188-eab8dc098000', 'ACTIVE', true);
 
 INSERT INTO tbl_tenant_invitation_code (tenant_invitation_code_id, code, entity_status, tenant_id)
 VALUES ('7f000001-88ea-1791-8188-eab8dc098000', 'ABC123', 'ACTIVE', '7f000001-88ea-1791-8188-eab8dc098000');

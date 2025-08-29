@@ -2,14 +2,6 @@ import React, { createContext, useState, ReactNode, useMemo, useEffect } from 'r
 import { UserResponse } from 'src/api/response/userResponse';
 import { viewMyUser } from 'src/api/userCrudApi';
 
-{/*
-interface UserContextType {
-  user: UserResponse | null;
-  setUser: (user: UserResponse | null) => void;
-  resetUser: () => void
-}
-  */}
-
 type UserContextType = {
   user: UserResponse | null | undefined;
   setUser: React.Dispatch<React.SetStateAction<UserResponse | null | undefined>>;

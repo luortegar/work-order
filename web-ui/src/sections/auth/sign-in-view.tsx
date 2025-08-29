@@ -18,13 +18,14 @@ import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
 import { AuthenticateRequest } from 'src/api/request/AuthenticateRequest';
 import { AxiosResponse } from 'axios';
 import { AuthenticateResponse, TenantDetails } from 'src/api/response/authenticate';
+import {jwtDecode} from "jwt-decode";
 
 
 // ----------------------------------------------------------------------
 
 export function SignInView() {
   const router = useRouter();
-  const { setToken, setRefreshToken, setCurrentTenantId, setTenantDetailsList } = useAuth();
+  const { setToken, setRefreshToken, setCurrentTenantId, setTenantDetailsList, setUserId } = useAuth();
   const { showMessage } = useSnackbar();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,6 +53,9 @@ export function SignInView() {
     sigIn(authenticateRequest)
       .then((response: AxiosResponse<AuthenticateResponse, any>) => {
         setToken(response.data.token);
+        const decoded = jwtDecode<MyToken>(response.data.token);
+        console.log("decoded___", decoded)
+        setUserId(decoded.jti || "123");
         setRefreshToken(response.data.refreshToken);
         setTenantDetailsList(response.data.tenantDetailsList);
         setCurrentTenantId(getDefaultTenantId(response.data.tenantDetailsList));

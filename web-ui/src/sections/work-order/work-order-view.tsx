@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { use, useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import {
@@ -27,6 +27,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { EquipmentAutocompleteResponse } from 'src/api/types/equitmentTypes';
+import { autocompleteEmployeesAndFilterByBranchId } from 'src/api/employeesApi';
+import { EmployeesAutocompleteResponse } from 'src/api/types/employeesTypes';
+import { useAuth } from 'src/context/auth/AuthContext';
 
 // ----------------------
 // Tipos
@@ -59,7 +62,10 @@ export default function WorkOrderView() {
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
   const [brantOptions, setBrantOptions] = useState<BranchAutocompleteResponse[]>([]);
   const [equipmentOptions, setEquipmentOptions] = useState<EquipmentAutocompleteResponse[]>([]);
+  const [employeesOptions, setEmployeesOptions] = useState<EmployeesAutocompleteResponse[]>([]);
 
+    const { userId } = useAuth();
+  
 
   // useForm tipado
   const { register, handleSubmit, reset, control, getValues, watch } = useForm<WorkOrderForm>({
@@ -99,6 +105,19 @@ export default function WorkOrderView() {
     },
     [showMessage]
   );
+
+  const fetchEmployeesOptions = useCallback(
+    (branchId: string, input: string) => {
+      autocompleteEmployeesAndFilterByBranchId(branchId, input)
+        .then((res) => setEmployeesOptions(res))
+        .catch(() => showMessage('Failed to load employees options', 'error'));
+    },
+    [showMessage]
+  );
+
+
+
+//autocompleteBranch
 
   useEffect(() => {
 
@@ -309,6 +328,7 @@ export default function WorkOrderView() {
               )}
             />
             {branchId &&
+            <>
               <Controller
                 name="equipmentId"
                 control={control}
@@ -342,6 +362,40 @@ export default function WorkOrderView() {
                   />
                 )}
               />
+                <Controller
+                name="recipientId"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete<EmployeesAutocompleteResponse, false, false, true>
+                    options={employeesOptions}
+                    getOptionLabel={(option) =>
+                      typeof option === 'string' ? option : option.employeeFullName
+                    }
+
+                    onChange={(event, newValue) => {
+                      if (newValue && typeof newValue !== 'string') {
+                        field.onChange(newValue.employeeId);
+                      } else {
+                        field.onChange('');
+                      }
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      console.log("_____recipientId_____", branchId)
+                      fetchEmployeesOptions(branchId, newInputValue)
+                    }
+                    }
+                    value={
+                      employeesOptions.find((option) => option.employeeId === getValues('recipientId')) || null
+                    }
+                    freeSolo
+                    disabled={!editing && !creating}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Recipient" variant="outlined" fullWidth />
+                    )}
+                  />
+                )}
+              />
+              </>
             }
 
             <TextField

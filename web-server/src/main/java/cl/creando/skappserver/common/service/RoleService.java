@@ -10,6 +10,7 @@ import cl.creando.skappserver.common.repository.PrivilegeRepository;
 import cl.creando.skappserver.common.repository.RolePrivilegeRepository;
 import cl.creando.skappserver.common.repository.RoleRepository;
 import cl.creando.skappserver.common.request.RoleRequest;
+import cl.creando.skappserver.common.response.RoleAutocompleteResponse;
 import cl.creando.skappserver.common.response.RoleDetailsResponse;
 import cl.creando.skappserver.common.response.RoleResponse;
 import jakarta.persistence.criteria.Predicate;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -114,5 +116,19 @@ public class RoleService {
         } catch (Exception e) {
             throw new SKException("An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public ResponseEntity<?> autocomplete(String searchTerm) {
+        Specification<Role> specification = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = List.of(
+                    criteriaBuilder.like(root.get("roleId").as(String.class), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(root.get("roleName"), CommonFunctions.getPattern(searchTerm))
+            );
+            return criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
+        };
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Role> all = roleRepository.findAll(specification, pageable);
+        List<RoleAutocompleteResponse> list = all.map(RoleAutocompleteResponse::new).stream().toList();
+        return ResponseEntity.ok(list);
     }
 }

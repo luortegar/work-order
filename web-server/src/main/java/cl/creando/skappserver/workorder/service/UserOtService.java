@@ -3,10 +3,12 @@ package cl.creando.skappserver.workorder.service;
 
 import cl.creando.skappserver.common.CommonFunctions;
 import cl.creando.skappserver.common.entity.common.File;
+import cl.creando.skappserver.common.entity.user.Role;
 import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.properties.StartedKitProperties;
 import cl.creando.skappserver.common.repository.FileRepository;
+import cl.creando.skappserver.common.repository.RoleRepository;
 import cl.creando.skappserver.common.repository.UserRepository;
 import cl.creando.skappserver.common.request.UpdatePasswordRequest;
 import cl.creando.skappserver.common.request.UserRequest;
@@ -20,12 +22,12 @@ import cl.creando.skappserver.workorder.repository.ClientRepository;
 import cl.creando.skappserver.workorder.repository.UserBranchRepository;
 import cl.creando.skappserver.workorder.repository.UserClientRepository;
 import cl.creando.skappserver.workorder.request.EmployeesRequest;
+import cl.creando.skappserver.workorder.response.UserAutocompleteResponse;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -54,7 +56,7 @@ public class UserOtService {
     private final UserClientRepository userClientRepository;
     private final BranchRepository branchRepository;
     private final UserBranchRepository userBranchRepository;
-
+    private final RoleRepository roleRepository;
 
     public Page<?> findAll(String searchTerm, Pageable pageable) {
         Specification<User> specification = (root, query, criteriaBuilder) -> criteriaBuilder.or(
@@ -221,26 +223,57 @@ public class UserOtService {
         return new PageImpl<>(list, all.getPageable(), all.getTotalElements());
     }
 
-    public Object autocomplete(UUID branchId, String searchTerm) {
+    public List<UserAutocompleteResponse> autocomplete(UUID branchId, String searchTerm) {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new SKException("Branch not found.", HttpStatus.NOT_FOUND));
         Client client = branch.getClient();
 
         Specification<User> specification = (root, query, criteriaBuilder) -> {
-            Join<User, UserBranch> userClientJoin = root.join("userBranchList", JoinType.INNER);
+            Join<User, UserBranch> userBranchJoin = root.join("userBranchList", JoinType.INNER);
+            Join<User, UserClient> userClientJoin = root.join("userClientList", JoinType.LEFT);
+
+            Predicate searchPredicate = criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), CommonFunctions.getPattern(searchTerm))
+            );
+            Predicate branchPredicate = criteriaBuilder.equal(userBranchJoin.get("branch"), branch);
+            Predicate clientPredicate = criteriaBuilder.equal(userClientJoin.get("client"), client);
+            Predicate associationPredicate = criteriaBuilder.or(branchPredicate, clientPredicate);
+
+            return criteriaBuilder.and(searchPredicate, associationPredicate);
+        };
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<User> all = userRepository.findAll(specification, pageable);
+
+        return all.stream().map(UserAutocompleteResponse::new).toList();
+    }
+
+    public List<UserAutocompleteResponse> technicianAutocomplete(String searchTerm) {
+        Role role = roleRepository.findByRoleName("Technician")
+                .orElseThrow(() -> new SKException("Role not found", HttpStatus.INTERNAL_SERVER_ERROR));
+
+        Specification<User> specification = (root, query, criteriaBuilder) -> {
+            Join<Object, Object> userRoleJoin = root.join("userRoleList", JoinType.INNER);
+            Join<Object, Object> roleJoin = userRoleJoin.join("role", JoinType.INNER);
+
             Predicate searchPredicate = criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), CommonFunctions.getPattern(searchTerm))
             );
 
-            Predicate clientPredicate = criteriaBuilder.equal(userClientJoin.get("branch"), branch);
+            Predicate rolePredicate = criteriaBuilder.equal(roleJoin.get("roleId"), role.getRoleId());
 
-            return criteriaBuilder.and(searchPredicate, clientPredicate);
+            return criteriaBuilder.and(searchPredicate, rolePredicate);
         };
-        Pageable pageable = PageRequest.of(0, 10);
 
+        Pageable pageable = PageRequest.of(0, 10);
         Page<User> all = userRepository.findAll(specification, pageable);
-        return all.map(UserResponse::new).stream().toList();
+
+        return all.map(UserAutocompleteResponse::new).stream().toList();
     }
+
+
 }

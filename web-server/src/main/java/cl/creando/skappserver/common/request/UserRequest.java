@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -18,5 +19,6 @@ public class UserRequest {
     private String email;
     private String password;
     private UUID clientId;
+    private List<UUID> roleIds;
 }
 

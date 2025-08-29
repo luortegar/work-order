@@ -2,10 +2,14 @@ package cl.creando.skappserver.common.service;
 
 
 import cl.creando.skappserver.common.CommonFunctions;
+import cl.creando.skappserver.common.entity.user.Role;
+import cl.creando.skappserver.common.entity.user.UserRole;
 import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.entity.common.File;
 import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.properties.StartedKitProperties;
+import cl.creando.skappserver.common.repository.RoleRepository;
+import cl.creando.skappserver.common.repository.UserRoleRepository;
 import cl.creando.skappserver.common.request.UpdatePasswordRequest;
 import cl.creando.skappserver.common.repository.FileRepository;
 import cl.creando.skappserver.common.repository.UserRepository;
@@ -40,6 +44,8 @@ public class UserService {
     private final FileRepository fileRepository;
     private final PasswordEncoder passwordEncoder;
     private final StartedKitProperties startedKitProperties;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
 
 
 
@@ -55,7 +61,7 @@ public class UserService {
     }
 
     public UserResponse findById(UUID id) {
-        User user = userRepository.findById(id).orElseThrow();
+        User user = userRepository.findById(id).orElseThrow(()->new SKException("Invalid user id.", HttpStatus.BAD_REQUEST));
         return new UserResponse(user, startedKitProperties.getBase().getApiUrl());
     }
 
@@ -66,11 +72,29 @@ public class UserService {
                 .email(userRequest.getEmail())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .build();
-        return new UserResponse(userRepository.save(user));
+
+        if (userRequest.getRoleIds() != null && !userRequest.getRoleIds().isEmpty()) {
+            for (UUID roleId : userRequest.getRoleIds()) {
+                Role role = roleRepository.findById(roleId)
+                        .orElseThrow(() -> new SKException("Invalid role", HttpStatus.BAD_REQUEST));
+
+                UserRole userRole = new UserRole();
+                userRole.setUser(user);   // importante para mantener la relación
+                userRole.setRole(role);
+
+                user.getUserRoleList().add(userRole);
+            }
+        }
+        User userSaved = userRepository.save(user);
+
+        return new UserResponse(userSaved);
     }
 
+
     public UserResponse update(UUID uuid, UserRequest userRequest) {
-        User user = userRepository.findById(uuid).orElseThrow();
+        User user = userRepository.findById(uuid)
+                .orElseThrow(() -> new SKException("Invalid user id.", HttpStatus.BAD_REQUEST));
+
         if (StringUtils.hasText(userRequest.getFirstName())) {
             user.setFirstName(userRequest.getFirstName());
         }
@@ -83,8 +107,27 @@ public class UserService {
         if (StringUtils.hasText(userRequest.getPassword())) {
             user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         }
-        return new UserResponse(userRepository.save(user));
+
+        user.getUserRoleList().clear();
+
+        if (userRequest.getRoleIds() != null && !userRequest.getRoleIds().isEmpty()) {
+            for (UUID roleId : userRequest.getRoleIds()) {
+                Role role = roleRepository.findById(roleId)
+                        .orElseThrow(() -> new SKException("Invalid role", HttpStatus.BAD_REQUEST));
+
+                UserRole userRole = new UserRole();
+                userRole.setUser(user);
+                userRole.setRole(role);
+
+                user.getUserRoleList().add(userRole);
+            }
+        }
+
+        User userSaved = userRepository.save(user);
+
+        return new UserResponse(userSaved);
     }
+
 
     public ResponseEntity<?> delete(UUID uuid) {
         User user = userRepository.findById(uuid).orElseThrow();

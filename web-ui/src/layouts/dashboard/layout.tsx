@@ -27,6 +27,7 @@ import { NotificationsPopover } from '../components/notifications-popover';
 import type { MainSectionProps } from '../core/main-section';
 import type { HeaderSectionProps } from '../core/header-section';
 import type { LayoutSectionProps } from '../core/layout-section';
+import { UserProvider } from 'src/context/user/UserContext';
 
 // ----------------------------------------------------------------------
 
@@ -111,6 +112,7 @@ export function DashboardLayout({
   const renderMain = () => <MainSection {...slotProps?.main}>{children}</MainSection>;
 
   return (
+    <UserProvider>
     <LayoutSection
       /** **************************************
        * @Header
@@ -147,5 +149,6 @@ export function DashboardLayout({
     >
       {renderMain()}
     </LayoutSection>
+    </UserProvider>
   );
 }

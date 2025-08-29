@@ -32,7 +32,7 @@ export const navData = [
   },
   {
     title: 'User',
-    path: '/user',
+    path: '/home/user',
     icon: icon('ic-user'),
   },
   {
