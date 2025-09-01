@@ -35,6 +35,7 @@ export const navData = [
     path: '/home/user',
     icon: icon('ic-user'),
   },
+  /*
   {
     title: 'Product',
     path: '/products',
@@ -45,6 +46,7 @@ export const navData = [
       </Label>
     ),
   },
+  /*
   {
     title: 'Blog',
     path: '/blog',
@@ -55,9 +57,11 @@ export const navData = [
     path: '/sign-in',
     icon: icon('ic-lock'),
   },
+  
   {
     title: 'Not found',
     path: '/404',
     icon: icon('ic-disabled'),
   },
+  */
 ];

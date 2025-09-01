@@ -28,8 +28,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { EquipmentAutocompleteResponse } from 'src/api/types/equitmentTypes';
 import { autocompleteEmployeesAndFilterByBranchId } from 'src/api/employeesApi';
-import { EmployeesAutocompleteResponse } from 'src/api/types/employeesTypes';
+import { UserAutocompleteResponse } from 'src/api/types/employeesTypes';
 import { useAuth } from 'src/context/auth/AuthContext';
+import { autocompleteTechnicians } from 'src/api/techniciansApi';
 
 // ----------------------
 // Tipos
@@ -62,7 +63,9 @@ export default function WorkOrderView() {
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
   const [brantOptions, setBrantOptions] = useState<BranchAutocompleteResponse[]>([]);
   const [equipmentOptions, setEquipmentOptions] = useState<EquipmentAutocompleteResponse[]>([]);
-  const [employeesOptions, setEmployeesOptions] = useState<EmployeesAutocompleteResponse[]>([]);
+  const [employeesOptions, setEmployeesOptions] = useState<UserAutocompleteResponse[]>([]);
+  const [techniciansOptions, setTechniciansOptions] = useState<UserAutocompleteResponse[]>([]);
+
 
     const { userId } = useAuth();
   
@@ -116,11 +119,18 @@ export default function WorkOrderView() {
   );
 
 
+  const fetchTechniciansOptions = useCallback(
+    (input: string) => {
+      autocompleteTechnicians( input)
+        .then((res) => setTechniciansOptions(res))
+        .catch(() => showMessage('Failed to load technicians options', 'error'));
+    },
+    [showMessage]
+  );
 
-//autocompleteBranch
 
   useEffect(() => {
-
+    fetchTechniciansOptions('')
   }, [])
 
   useEffect(() => {
@@ -366,7 +376,7 @@ export default function WorkOrderView() {
                 name="recipientId"
                 control={control}
                 render={({ field }) => (
-                  <Autocomplete<EmployeesAutocompleteResponse, false, false, true>
+                  <Autocomplete<UserAutocompleteResponse, false, false, true>
                     options={employeesOptions}
                     getOptionLabel={(option) =>
                       typeof option === 'string' ? option : option.employeeFullName
@@ -397,6 +407,39 @@ export default function WorkOrderView() {
               />
               </>
             }
+
+            <Controller
+                name="technicianId"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete<UserAutocompleteResponse, false, false, true>
+                    options={techniciansOptions}
+                    getOptionLabel={(option) =>
+                      typeof option === 'string' ? option : option.employeeFullName
+                    }
+
+                    onChange={(event, newValue) => {
+                      if (newValue && typeof newValue !== 'string') {
+                        field.onChange(newValue.employeeId);
+                      } else {
+                        field.onChange('');
+                      }
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                      fetchTechniciansOptions(newInputValue)
+                    }
+                    }
+                    value={
+                      techniciansOptions.find((option) => option.employeeId === getValues('technicianId')) || null
+                    }
+                    freeSolo
+                    disabled={!editing && !creating}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Technician" variant="outlined" fullWidth />
+                    )}
+                  />
+                )}
+              />
 
             <TextField
               label="Service Details"

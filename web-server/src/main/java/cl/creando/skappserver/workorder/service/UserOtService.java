@@ -257,21 +257,16 @@ public class UserOtService {
         Specification<User> specification = (root, query, criteriaBuilder) -> {
             Join<Object, Object> userRoleJoin = root.join("userRoleList", JoinType.INNER);
             Join<Object, Object> roleJoin = userRoleJoin.join("role", JoinType.INNER);
-
             Predicate searchPredicate = criteriaBuilder.or(
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), CommonFunctions.getPattern(searchTerm))
             );
-
             Predicate rolePredicate = criteriaBuilder.equal(roleJoin.get("roleId"), role.getRoleId());
-
             return criteriaBuilder.and(searchPredicate, rolePredicate);
         };
-
         Pageable pageable = PageRequest.of(0, 10);
         Page<User> all = userRepository.findAll(specification, pageable);
-
         return all.map(UserAutocompleteResponse::new).stream().toList();
     }
 

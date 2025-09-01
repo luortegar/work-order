@@ -1,4 +1,4 @@
-export interface EmployeesAutocompleteResponse {
+export interface UserAutocompleteResponse {
   employeeId: string;
   employeeFullName: string;
 }

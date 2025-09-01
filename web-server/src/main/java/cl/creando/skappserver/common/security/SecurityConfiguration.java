@@ -27,6 +27,9 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
+
+                .requestMatchers(new MvcRequestMatcher(introspector, "/**")).permitAll()
+
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/authenticate")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/refresh-token")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/register")).permitAll()

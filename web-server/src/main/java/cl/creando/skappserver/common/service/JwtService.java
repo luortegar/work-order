@@ -2,6 +2,7 @@ package cl.creando.skappserver.common.service;
 
 import cl.creando.skappserver.common.entity.user.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -19,9 +20,12 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "404E635266556A586E3272357538782F45412453F4428472B4B6250645367566B5970";
+    @Value("${started-kit.token.secretKey:404E635266556A586E3272357538782F45412453F4428472B4B6250645367566B5970}")
+    private String secretKey ;
     @Value("${started-kit.token.duration.milliseconds:1800000}")
-    private String tokenTime;
+    private String tokenDuration;
+    @Value("${started-kit.token.expiration.milliseconds:18000000}")
+    private String tokenExpiration;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -33,11 +37,13 @@ public class JwtService {
     }
 
     public String generateToken(User userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        HashMap<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("token_type", "access");
+        return generateToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, User userDetails) {
-        long tokenTimeNumber = Long.parseLong(tokenTime);
+        long tokenTimeNumber = Long.parseLong(tokenDuration);
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -49,9 +55,17 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, UserDetails userDetails, String expectedType) {
+        try {
+            final String username = extractUsername(token);
+            final String tokenType = extractClaim(token, claims -> (String) claims.get("token_type"));
+
+            return username.equals(userDetails.getUsername())
+                    && !isTokenExpired(token)
+                    && expectedType.equals(tokenType); // asegura que sea access o refresh
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {
@@ -72,23 +86,23 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateRefreshToken(User user) {
-        long tokenTimeNumber = Long.parseLong(tokenTime);
-
+        long tokenExpiration = Long.parseLong(this.tokenExpiration);
         Map<String, String> extraClaims = new HashMap<>();
+        extraClaims.put("token_type", "refresh");
         extraClaims.put("userId", user.getUserId().toString());
-
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + (tokenTimeNumber * 2L)))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
 }

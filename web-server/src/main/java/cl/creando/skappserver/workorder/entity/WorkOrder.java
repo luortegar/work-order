@@ -28,6 +28,9 @@ public class WorkOrder extends AuditableEntity {
     private UUID workOrderId;
     private String workOrderNumber;
 
+    @Enumerated(EnumType.STRING)
+    private WorkOrderStatus workOrderStatus;
+
     @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
     @JoinColumn(name = "branchId")
     private Branch branch;
@@ -61,5 +64,12 @@ public class WorkOrder extends AuditableEntity {
     private LocalDateTime startTime;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
+
+    @PrePersist
+    public void prePersist() {
+        if (workOrderStatus == null) {
+            workOrderStatus = WorkOrderStatus.DRAFT;
+        }
+    }
 
 }

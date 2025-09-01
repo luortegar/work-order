@@ -2,6 +2,7 @@ package cl.creando.skappserver.common.errorhandler;
 
 import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.exception.TokenRefreshException;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,20 @@ public class ControllerAdvice {
 
         return ResponseEntity.status(ex.getHttpStatus()).body(new ErrorMessage(
                 ex.getHttpStatus().value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false)));
+    }
+
+    @ExceptionHandler(value = ExpiredJwtException.class)
+    public ResponseEntity<ErrorMessage> handleExpiredJwtException(ExpiredJwtException ex, WebRequest request) {
+        logger.warn("ExpiredJwtException caught: {} - Path: {} - Status: {}",
+                ex.getMessage(),
+                request.getDescription(false),
+                HttpStatus.UNAUTHORIZED);
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorMessage(
+                HttpStatus.UNAUTHORIZED.value(),
                 new Date(),
                 ex.getMessage(),
                 request.getDescription(false)));
