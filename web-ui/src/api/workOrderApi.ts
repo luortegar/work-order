@@ -6,8 +6,8 @@ export const view = async (id: string):Promise<DetailedWorkOrderResponse> => {
     return data;
 }
 
-export const list = async (size : number = 10, page : number = 0, sort : string = '', searchTerm : string = '') => 
-    axios.get(`/private/v1/work-orders?size=${size}&page=${page}&sort=${sort}&searchTerm=${searchTerm}`)
+export const list = async (size : number = 10, page : number = 0, sort : string = '', searchTerm : string = '', workOrderStatus : string|null = null) => 
+    axios.get(`/private/v1/work-orders?size=${size}&page=${page}&sort=${sort}&searchTerm=${searchTerm}&workOrderStatus=${workOrderStatus}`)
 
 export const create = async (payload: any) => 
     axios.post(`/private/v1/work-orders`, payload)

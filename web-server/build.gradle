@@ -51,6 +51,16 @@ dependencies {
 	// PDF
 	implementation 'com.itextpdf:itext7-core:7.2.1'
 
+	// Spring Boot + Thymeleaf
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// Flying Saucer con OpenPDF
+	implementation 'org.xhtmlrenderer:flying-saucer-pdf-openpdf:9.4.0'
+
+	// OpenHTMLToPDF (alternativa más moderna con más soporte CSS)
+	implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+
+
 	// Database
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'

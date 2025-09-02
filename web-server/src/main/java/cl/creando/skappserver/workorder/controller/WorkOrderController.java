@@ -1,6 +1,7 @@
 package cl.creando.skappserver.workorder.controller;
 
 
+import cl.creando.skappserver.workorder.entity.WorkOrderStatus;
 import cl.creando.skappserver.workorder.request.WorkOrderRequest;
 import cl.creando.skappserver.workorder.service.WorkOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,11 @@ public class WorkOrderController {
     private WorkOrderService workOrderService;
 
     @GetMapping
-    public ResponseEntity<?> list(@RequestParam(name = "searchTerm", required = false, defaultValue = "") String searchTerm, Pageable pageable) {
-        return workOrderService.findAll(searchTerm, pageable);
+    public ResponseEntity<?> list(
+            @RequestParam(name = "searchTerm", required = false, defaultValue = "") String searchTerm,
+            @RequestParam(name = "workOrderStatus", required = false) WorkOrderStatus workOrderStatus,
+            Pageable pageable) {
+        return workOrderService.findAll(searchTerm, workOrderStatus, pageable);
     }
 
     @GetMapping("/{id}")

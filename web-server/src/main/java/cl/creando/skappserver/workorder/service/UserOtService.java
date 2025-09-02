@@ -228,27 +228,32 @@ public class UserOtService {
                 .orElseThrow(() -> new SKException("Branch not found.", HttpStatus.NOT_FOUND));
         Client client = branch.getClient();
 
-        Specification<User> specification = (root, query, criteriaBuilder) -> {
-            Join<User, UserBranch> userBranchJoin = root.join("userBranchList", JoinType.INNER);
+        Specification<User> specification = (root, query, cb) -> {
+            query.distinct(true);
+
+            Join<User, UserBranch> userBranchJoin = root.join("userBranchList", JoinType.LEFT);
             Join<User, UserClient> userClientJoin = root.join("userClientList", JoinType.LEFT);
 
-            Predicate searchPredicate = criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), CommonFunctions.getPattern(searchTerm)),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), CommonFunctions.getPattern(searchTerm)),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), CommonFunctions.getPattern(searchTerm))
-            );
-            Predicate branchPredicate = criteriaBuilder.equal(userBranchJoin.get("branch"), branch);
-            Predicate clientPredicate = criteriaBuilder.equal(userClientJoin.get("client"), client);
-            Predicate associationPredicate = criteriaBuilder.or(branchPredicate, clientPredicate);
+            Predicate branchPredicate = cb.equal(userBranchJoin.get("branch"), branch);
+            Predicate clientPredicate = cb.equal(userClientJoin.get("client"), client);
 
-            return criteriaBuilder.and(searchPredicate, associationPredicate);
+            Predicate searchPredicate = cb.or(
+                    cb.like(cb.lower(root.get("firstName")), CommonFunctions.getPattern(searchTerm)),
+                    cb.like(cb.lower(root.get("lastName")), CommonFunctions.getPattern(searchTerm)),
+                    cb.like(cb.lower(root.get("email")), CommonFunctions.getPattern(searchTerm))
+            );
+
+            return cb.and(searchPredicate, cb.or(branchPredicate, clientPredicate));
         };
 
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<User> all = userRepository.findAll(specification, pageable);
+        Pageable pageable = PageRequest.of(0, 10); // 🔹 límite en la query
+        Page<User> users = userRepository.findAll(specification, pageable);
 
-        return all.stream().map(UserAutocompleteResponse::new).toList();
+        return users.stream()
+                .map(UserAutocompleteResponse::new)
+                .toList();
     }
+
 
     public List<UserAutocompleteResponse> technicianAutocomplete(String searchTerm) {
         Role role = roleRepository.findByRoleName("Technician")

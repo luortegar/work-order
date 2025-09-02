@@ -17,7 +17,7 @@ export default function WorkOrderList() {
   const { showMessage } = useSnackbar();
   const navigate = useNavigate();
 
-  const [tabValue, setTabValue] = useState<'draft' | 'sent'>('draft');
+  const [workOrderStatus, setWorkOrderStatus] = useState<'DRAFT' | 'SENT'>('DRAFT');
   const [dataList, setDataList] = useState<any[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [value, setValue] = React.useState('1');
@@ -88,11 +88,11 @@ export default function WorkOrderList() {
   ];
 
   useEffect(() => {
-    refreshData(5, 0, '', tabValue);
-  }, [tabValue]);
+    refreshData(5, 0, '', '');
+  }, [workOrderStatus]);
 
   const refreshData = (rowsPerPage: number, page: number, sort: string, filterName: string) => {
-    list(rowsPerPage, page, sort, filterName)
+    list(rowsPerPage, page, sort, filterName, workOrderStatus)
       .then((r) => {
         setDataList(r.data.content);
         setRowCount(r.data.totalElements);

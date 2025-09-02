@@ -81,20 +81,19 @@ export function SignInView() {
         flexDirection: 'column',
       }}
     >
-      <TextField
-        fullWidth
-        name="email"
-        label="Email address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={errors.email}
-        helperText={errors.email && 'Email is required'}
-        defaultValue=""
-        sx={{ mb: 3 }}
-        slotProps={{
-          inputLabel: { shrink: true },
-        }}
-      />
+    <TextField
+      fullWidth
+      name="email"
+      label="Email address"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      error={errors.email}
+      helperText={errors.email && 'Email is required'}
+      sx={{ mb: 3 }}
+      slotProps={{
+        inputLabel: { shrink: true },
+      }}
+    />
 
       <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}  href="/forgot-password">
         Forgot password?
@@ -104,7 +103,6 @@ export function SignInView() {
         fullWidth
         name="password"
         label="Password"
-        defaultValue=""
         type={showPassword ? 'text' : 'password'}
         value={password}
         onChange={(e) => setPassword(e.target.value)}

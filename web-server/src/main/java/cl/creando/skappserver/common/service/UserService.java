@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -82,6 +83,9 @@ public class UserService {
                 userRole.setUser(user);   // importante para mantener la relación
                 userRole.setRole(role);
 
+                if(user.getUserRoleList() == null){
+                    user.setUserRoleList(new ArrayList<>());
+                }
                 user.getUserRoleList().add(userRole);
             }
         }

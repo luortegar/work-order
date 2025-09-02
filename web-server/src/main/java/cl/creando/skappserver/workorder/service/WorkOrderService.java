@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class WorkOrderService {
         return workOrderRepository.findAll();
     }
 
-    public ResponseEntity<?> findAll(String searchTerm, Pageable pageable) {
+    public ResponseEntity<?> findAllOld(String searchTerm, WorkOrderStatus workOrderStatus, Pageable pageable) {
         Specification<WorkOrder> specification = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = List.of(
                     criteriaBuilder.like(root.get("workOrderId").as(String.class), CommonFunctions.getPattern(searchTerm)),
@@ -66,6 +67,32 @@ public class WorkOrderService {
         Page page = new PageImpl(list, all.getPageable(), all.getTotalElements());
         return ResponseEntity.ok(page);
     }
+
+    public ResponseEntity<?> findAll(String searchTerm, WorkOrderStatus workOrderStatus, Pageable pageable) {
+        Specification<WorkOrder> specification = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            // Search by ID or Number
+            predicates.add(criteriaBuilder.like(root.get("workOrderId").as(String.class), CommonFunctions.getPattern(searchTerm)));
+            predicates.add(criteriaBuilder.like(root.get("workOrderNumber"), CommonFunctions.getPattern(searchTerm)));
+            // Combine OR for searchTerm
+            Predicate searchPredicate = criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+            // Final predicate list
+            List<Predicate> finalPredicates = new ArrayList<>();
+            finalPredicates.add(searchPredicate);
+            // Add AND filter for workOrderStatus if not null
+            if (workOrderStatus != null) {
+                finalPredicates.add(criteriaBuilder.equal(root.get("workOrderStatus"), workOrderStatus));
+            }
+            return criteriaBuilder.and(finalPredicates.toArray(new Predicate[0]));
+        };
+
+        Page<WorkOrder> all = workOrderRepository.findAll(specification, pageable);
+        List<WorkOrderResponse> list = all.map(WorkOrderResponse::new).stream().toList();
+
+        Page<WorkOrderResponse> page = new PageImpl<>(list, all.getPageable(), all.getTotalElements());
+        return ResponseEntity.ok(page);
+    }
+
 
     public DetailedWorkOrderResponse findById(UUID id) {
         return new DetailedWorkOrderResponse(workOrderRepository.findById(id).orElseThrow(() -> new SKException("Invalid id.", HttpStatus.NOT_FOUND)));

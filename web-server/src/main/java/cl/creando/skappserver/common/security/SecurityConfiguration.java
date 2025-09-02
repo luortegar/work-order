@@ -31,6 +31,7 @@ public class SecurityConfiguration {
                 .requestMatchers(new MvcRequestMatcher(introspector, "/**")).permitAll()
 
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/authenticate")).permitAll()
+                .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/pfdExample")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/refresh-token")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/register")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/recovery-password")).permitAll()

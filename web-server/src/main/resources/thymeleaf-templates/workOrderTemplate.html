@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Orden de Trabajo #OT967</title>
+  <style>
+    /* ===== PÁGINA (OpenHTMLToPDF / Flying Saucer style) ===== */
+    @page {
+      size: Letter;
+      margin: 20mm;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      color: #333;
+      font-size: 10pt;
+    }
+
+    .page-container { margin: 0; }
+
+    /* ===== ENCABEZADO ===== */
+    .header {
+      border-bottom: 2px solid #0056b3;
+      padding-bottom: 5mm;
+      margin-bottom: 6mm;
+    }
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .header-table td {
+      vertical-align: top;
+    }
+    .logo-cell {
+      width: 60mm;
+    }
+    .logo-cell img {
+      height: 18mm; /* fijo para PDF */
+    }
+    .title-cell {
+      text-align: right;
+      font-size: 12pt;
+    }
+    .title-cell h1 {
+      margin: 0;
+      color: #0056b3;
+      font-size: 14pt;
+    }
+    .title-cell p { margin: 2mm 0 0 0; }
+
+    /* ===== SECCIONES ===== */
+    .section {
+      border: 0.2mm solid #cccccc;
+      border-radius: 2mm;
+      padding: 4mm;
+      margin-bottom: 6mm;
+      background-color: #fafafa;
+      page-break-inside: avoid; /* evita cortes internos */
+    }
+    .section h2 {
+      margin: 0 0 3mm 0;
+      padding-bottom: 2mm;
+      border-bottom: 0.2mm solid #dddddd;
+      font-size: 12pt;
+      color: #0056b3;
+    }
+
+    /* ===== DOS COLUMNAS (tabla fija) ===== */
+    .two-col-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .two-col-table td {
+      width: 50%;
+      padding: 0 3mm;
+      vertical-align: top;
+    }
+
+    /* ===== LISTAS ===== */
+    ul { margin: 0; padding-left: 5mm; }
+    .details-list ul { list-style: none; padding-left: 0; }
+    .details-list li { margin-bottom: 1.5mm; }
+    .observations ul { list-style: disc; }
+    .observations li { margin-bottom: 1.5mm; }
+
+    /* ===== FIRMAS ===== */
+    .signatures {
+      page-break-inside: avoid;
+      margin-top: 10mm;
+    }
+    .sign-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .sign-table td {
+      width: 50%;
+      text-align: center;
+      vertical-align: bottom;
+      padding-top: 8mm;
+    }
+    .sig-line {
+      border-top: 0.3mm solid #000;
+      padding-top: 2mm;
+      font-size: 9pt;
+    }
+
+    /* ===== CONTACTO ===== */
+    .contact {
+      text-align: center;
+      margin-top: 5mm;
+      font-size: 8pt;
+      color: #777;
+    }
+
+    /* ===== GALERÍA DE FOTOS (2 por fila con tabla) ===== */
+    .photo-gallery { margin-top: 4mm; }
+    .photo-gallery h2 {
+      text-align: center;
+      color: #0056b3;
+      border-bottom: 0.2mm solid #dddddd;
+      padding-bottom: 2mm;
+      margin: 0 0 5mm 0;
+    }
+    .photo-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .photo-table td {
+      width: 50%;
+      text-align: center;
+      padding: 2mm;
+      vertical-align: top;
+      page-break-inside: avoid;
+    }
+    .photo {
+      width: 80mm;       /* ancho fijo para 2 por fila */
+      height: auto;
+      border: 0.4mm solid #0056b3;
+      border-radius: 2mm;
+    }
+
+    /* ===== SALTO DE PÁGINA ===== */
+    .page-break { page-break-before: always; }
+  </style>
+</head>
+<body>
+
+<!-- ========== PÁGINA 1 ========== -->
+<div class="page-container">
+  <div class="header">
+    <table class="header-table">
+      <tr>
+        <td class="logo-cell">
+          <img th:src="${data.logo}" alt="Logo de la empresa"/>
+        </td>
+        <td class="title-cell">
+          <h1>ORDEN DE TRABAJO #OT967</h1>
+          <p>TraumaCenter (Rancagua)</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>Detalles Generales</h2>
+    <table class="two-col-table">
+      <tr>
+        <td>
+          <p><strong>Cliente:</strong> Angela Mazo Varas</p>
+          <p><strong>Teléfono:</strong> +569 9042 4283</p>
+          <p><strong>Correo:</strong> angelamazov@gmail.com</p>
+        </td>
+        <td>
+          <p><strong>Inicio:</strong> 13:00 del 09 de Abril de 2025</p>
+          <p><strong>Término:</strong> 17:00 del 09 de Abril de 2025</p>
+          <p><strong>Horas Mano de obra:</strong> 4 hrs.</p>
+          <p><strong>Horas Traslado:</strong> 3 hrs.</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="section details-list">
+    <h2>Detalle del Servicio</h2>
+    <ul>
+      <li>• Se realiza limpieza interna y externa de CPU NX.</li>
+      <li>• Revisión de servicio y log de eventos.</li>
+      <li>• Se realiza limpieza interna y externa de UPS.</li>
+      <li>• NX 24.0.2900 HP Flex Pro i58500 SN: CZC2267QYV</li>
+      <li>• XD14 VIVIX-S 3643VW SN: VEABCB075</li>
+      <li>• UPS SRVPM1KIL SN: 9S1936A78864 SRV36BP-9A SN:9S1917A29174</li>
+    </ul>
+  </div>
+
+  <div class="section observations">
+    <h2>Observaciones</h2>
+    <ul>
+      <li>Se realizan pruebas de disparo satisfactoriamente.</li>
+      <li>Se reemplaza cable de energía de Cargador de Baterías del Panel.</li>
+      <li>TM Patricia observa alineación de colimador respecto a EasyLift; se requiere escalera y herramientas para ajustar estructura. Se coordinará visita para ajustes.</li>
+    </ul>
+  </div>
+
+  <div class="signatures">
+    <table class="sign-table">
+      <tr>
+        <td>
+          <div class="sig-line">
+            <strong>Patricia Pérez</strong><br/>
+            +569 9545 2854
+          </div>
+        </td>
+        <td></td>
+        <td>
+          <div class="sig-line">
+            <strong>Rubén Lorca</strong><br/>
+            rlorca@in.geros.cl — +569 3434 8370
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="contact">
+    <p>Mantenimiento, reparación, venta de equipos radiográficos y sistema RISPACS.</p>
+    <p>INGEROS SPA. - www.ingeros.cl</p>
+  </div>
+</div>
+
+<!-- ========== PÁGINA 2 ========== -->
+<div class="page-break"></div>
+<div class="page-container">
+  <div class="header">
+    <table class="header-table">
+      <tr>
+        <td class="logo-cell">
+          <img th:src="${data.logo}" alt="Logo de la empresa"/>
+        </td>
+        <td class="title-cell">
+          <h1>ORDEN DE TRABAJO #OT967</h1>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="photo-gallery">
+    <!-- Repite filas de 2 fotos por fila -->
+    <table class="photo-table" th:with="size=${#lists.size(data.photoList)}">
+      <tbody>
+      <tr th:each="i : ${#numbers.sequence(0, size - 1, 2)}">
+        <td>
+          <img class="photo" th:src="${data.photoList[i]}" alt="Foto del trabajo"/>
+        </td>
+        <td>
+          <img class="photo"
+               th:if="${i + 1 < size}"
+               th:src="${data.photoList[i + 1]}"
+               alt="Foto del trabajo"/>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+</body>
+</html>
