@@ -1,6 +1,6 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useContext, use } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -16,6 +16,7 @@ import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { _myAccount } from 'src/_mock';
 import { useNavigate } from 'react-router-dom';
+import { UserContext } from 'src/context/user/UserContext';
 
 // ----------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
   const navigateTo = useNavigate()
 
+  const {user} = useContext(UserContext)!
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -66,16 +68,15 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
         onClick={handleOpenPopover}
         sx={{
           p: '2px',
-          width: 40,
-          height: 40,
+          width: 45,
+          height: 45,
           background: (theme) =>
             `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
           ...sx,
         }}
         {...other}
       >
-        <Avatar src={_myAccount.photoURL} alt={_myAccount.displayName} sx={{ width: 1, height: 1 }}>
-          {_myAccount.displayName.charAt(0).toUpperCase()}
+        <Avatar src={user?.profilePictureUrl} sx={{ width: 1, height: 1 }}>
         </Avatar>
       </IconButton>
 
@@ -93,11 +94,11 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       >
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {_myAccount?.displayName}
+            {user?.firstName + ' ' + user?.lastName}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {_myAccount?.email}
+            {user?.email}
           </Typography>
         </Box>
 

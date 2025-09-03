@@ -2,8 +2,8 @@ package cl.creando.skappserver.workorder.service;
 
 
 import cl.creando.skappserver.common.CommonFunctions;
-import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.entity.common.File;
+import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.repository.FileRepository;
 import cl.creando.skappserver.common.repository.UserRepository;
@@ -16,7 +16,6 @@ import cl.creando.skappserver.workorder.response.DetailedWorkOrderResponse;
 import cl.creando.skappserver.workorder.response.WorkOrderResponse;
 import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -41,7 +40,7 @@ import java.util.stream.Collectors;
 public class WorkOrderService {
 
     private final WorkOrderRepository workOrderRepository;
-    private final WorkOrderPdfGenerator workOrderPdfGenerator;
+    private final WorkOrderPdfGenerator pdfGenerator;
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
     private final EquipmentRepository equipmentRepository;
@@ -193,7 +192,7 @@ public class WorkOrderService {
     public ResponseEntity<Resource> generatePDF(UUID id) throws IOException {
         WorkOrder oldWorkOrder = workOrderRepository.getReferenceById(id);
 
-        InputStream inputStream = workOrderPdfGenerator.generateWorkOrderPdf(oldWorkOrder);
+        InputStream inputStream = pdfGenerator.generateWorkOrderPdf(oldWorkOrder);
 
         InputStreamResource file = new InputStreamResource(inputStream);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "ot.pdf")

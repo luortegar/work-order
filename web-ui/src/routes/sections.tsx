@@ -17,6 +17,7 @@ export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const WorkOrderPage = lazy(() => import('src/pages/work-order'));
 export const ClientPage = lazy(() => import('src/pages/client-page'));
+export const ProfilePage = lazy(() => import('src/pages/profile'));
 
 
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
@@ -59,6 +60,8 @@ export const routesSection: RouteObject[] = [
       { path: 'home/work-order/*', element: <WorkOrderPage /> },
       { path: 'home/client/*', element: <ClientPage /> },
       { path: 'home/user/*', element: <UserPage /> },
+      { path: 'home/profile', element: <ProfilePage /> },
+
 
       //{ path: 'user', element: <UserPage /> },
       { path: 'products', element: <ProductsPage /> },
