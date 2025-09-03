@@ -24,7 +24,7 @@ export default function PersonalInfoCard({
   onEditToggle
 }: PersonalInfoCardProps) {
   return (
-    <Card sx={{ borderRadius: 4, boxShadow: 3 }}>
+    <Card sx={{ borderRadius: 3, boxShadow: '0px 4px 20px rgba(0,0,0,0.05)'}}>
       <CardHeader title="Personal Information" sx={{ pb: 0 }} />
       <CardContent>
         <Grid container spacing={3}>

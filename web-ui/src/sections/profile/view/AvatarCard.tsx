@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Avatar, Typography, Button } from '@mui/material';
+import { Card, Avatar, Typography, Button, IconButton } from '@mui/material';
 import { Lock as LockIcon, Upload as UploadIcon } from '@mui/icons-material';
 
 interface AvatarCardProps {
@@ -20,21 +20,19 @@ export default function AvatarCard({
   onChangePasswordClick
 }: AvatarCardProps) {
   return (
-    <Card sx={{ p: 4, textAlign: 'center', borderRadius: 4, boxShadow: 3 }}>
-      <Avatar
-        alt="Avatar"
-        src={avatar || undefined}
+    <Card sx={{ p: 4, textAlign: 'center', borderRadius: 3, boxShadow: '0px 4px 20px rgba(0,0,0,0.05)' }}>
+      <IconButton
         sx={{
+          p: '2px',
           width: 150,
           height: 150,
-          mb: 2,
-          mx: 'auto',
-          border: '3px solid #fff',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          background: (theme) =>
+            `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`
         }}
       >
-        {firstName?.charAt(0).toUpperCase()}
-      </Avatar>
+        <Avatar src={avatar} sx={{ width: 1, height: 1 }}>
+        </Avatar>
+      </IconButton>
       <Typography variant="h6" fontWeight="bold">{`${firstName} ${lastName}`}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{email}</Typography>
 
