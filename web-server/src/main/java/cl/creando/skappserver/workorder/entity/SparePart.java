@@ -1,5 +1,6 @@
 package cl.creando.skappserver.workorder.entity;
 
+import cl.creando.skappserver.common.entity.common.AuditableEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -16,7 +17,7 @@ import static org.hibernate.annotations.UuidGenerator.Style.TIME;
 @Table(name = "tbl_spare_part")
 @Getter
 @Setter
-public class SparePart {
+public class SparePart  extends AuditableEntity {
     @Id
     @GeneratedValue
     @UuidGenerator(style = TIME)

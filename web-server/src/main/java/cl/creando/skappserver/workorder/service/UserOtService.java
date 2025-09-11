@@ -5,11 +5,13 @@ import cl.creando.skappserver.common.CommonFunctions;
 import cl.creando.skappserver.common.entity.common.File;
 import cl.creando.skappserver.common.entity.user.Role;
 import cl.creando.skappserver.common.entity.user.User;
+import cl.creando.skappserver.common.entity.user.UserRole;
 import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.properties.StartedKitProperties;
 import cl.creando.skappserver.common.repository.FileRepository;
 import cl.creando.skappserver.common.repository.RoleRepository;
 import cl.creando.skappserver.common.repository.UserRepository;
+import cl.creando.skappserver.common.repository.UserRoleRepository;
 import cl.creando.skappserver.common.request.UpdatePasswordRequest;
 import cl.creando.skappserver.common.request.UserRequest;
 import cl.creando.skappserver.common.response.UserResponse;
@@ -57,6 +59,7 @@ public class UserOtService {
     private final BranchRepository branchRepository;
     private final UserBranchRepository userBranchRepository;
     private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
 
     public Page<?> findAll(String searchTerm, Pageable pageable) {
         Specification<User> specification = (root, query, criteriaBuilder) -> criteriaBuilder.or(
@@ -189,6 +192,13 @@ public class UserOtService {
         userClient.setClient(client);
         userClient.setUser(user);
         userClientRepository.save(userClient);
+
+        Role role = roleRepository.findByRoleName("External user").orElseThrow(()->new SKException("Role not found.", HttpStatus.INTERNAL_SERVER_ERROR));
+
+        UserRole userRole = new UserRole();
+        userRole.setRole(role);
+        userRole.setUser(user);
+        userRoleRepository.save(userRole);
 
         if(request.getBranchId() != null){
             Branch branch = branchRepository.findById(request.getBranchId()) .orElseThrow(() -> new SKException("Branch not found.", HttpStatus.NOT_FOUND));

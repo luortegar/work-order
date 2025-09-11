@@ -74,23 +74,20 @@ public class UserService {
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .build();
 
+        User userSaved = userRepository.save(user);
+
         if (userRequest.getRoleIds() != null && !userRequest.getRoleIds().isEmpty()) {
             for (UUID roleId : userRequest.getRoleIds()) {
                 Role role = roleRepository.findById(roleId)
                         .orElseThrow(() -> new SKException("Invalid role", HttpStatus.BAD_REQUEST));
 
                 UserRole userRole = new UserRole();
-                userRole.setUser(user);   // importante para mantener la relación
+                userRole.setUser(userSaved);
                 userRole.setRole(role);
 
-                if(user.getUserRoleList() == null){
-                    user.setUserRoleList(new ArrayList<>());
-                }
-                user.getUserRoleList().add(userRole);
+                userRoleRepository.save(userRole);
             }
         }
-        User userSaved = userRepository.save(user);
-
         return new UserResponse(userSaved);
     }
 

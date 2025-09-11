@@ -26,19 +26,21 @@ public class ClientService {
     private final ClientRepository clientRepository;
 
     public Page<?> findAll(String searchTerm, Pageable pageable) {
-        Specification<Client> specification = (root, query, criteriaBuilder) -> criteriaBuilder.or(
-                criteriaBuilder.like(root.get("companyName"), CommonFunctions.getPattern(searchTerm)),
-                criteriaBuilder.like(root.get("uniqueTaxpayerIdentification"), CommonFunctions.getPattern(searchTerm)),
-                criteriaBuilder.like(root.get("business"), CommonFunctions.getPattern(searchTerm)),
-                criteriaBuilder.like(root.get("address"), CommonFunctions.getPattern(searchTerm)),
-                criteriaBuilder.like(root.get("commune"), CommonFunctions.getPattern(searchTerm)),
-                criteriaBuilder.like(root.get("city"), CommonFunctions.getPattern(searchTerm))
-        );
+        Specification<Client> specification = (root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.desc(root.get("creationDate")));
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(root.get("companyName"), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(root.get("uniqueTaxpayerIdentification"), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(root.get("business"), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(root.get("address"), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(root.get("commune"), CommonFunctions.getPattern(searchTerm)),
+                    criteriaBuilder.like(root.get("city"), CommonFunctions.getPattern(searchTerm))
+            );
+        };
         Page<Client> all = clientRepository.findAll(specification, pageable);
 
         List<ClientResponse> list = all.map(ClientResponse::new).stream().toList();
         return new PageImpl<>(list, all.getPageable(), all.getTotalElements());
-
     }
 
     public ClientResponse findById(UUID id) {

@@ -52,6 +52,9 @@ public class User extends AuditableEntity implements UserDetails {
     @Size(max = 50)
     @Email
     private String email;
+
+    private String phone;
+
     private String password;
 
     private String phoneNumber;
@@ -65,7 +68,7 @@ public class User extends AuditableEntity implements UserDetails {
     private File profilePictureFileId;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<UserRole> userRoleList;
 
@@ -117,5 +120,9 @@ public class User extends AuditableEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return isEnable;
+    }
+
+    public String getFullName() {
+        return String.format("%s %s", this.firstName, this.lastName);
     }
 }

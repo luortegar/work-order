@@ -69,7 +69,6 @@ export default function BranchList() {
     { field: 'branchName', headerName: 'Branch name', width: 200, flex: 0.5 },
     { field: 'address', headerName: 'Address', width: 200, flex: 0.5 },
     { field: 'commune', headerName: 'Commune', width: 200, flex: 0.5 },
-    { field: 'region', headerName: 'Region', width: 200, flex: 0.5 },
   ];
 
   const [dataList, setDataList] = useState([]);

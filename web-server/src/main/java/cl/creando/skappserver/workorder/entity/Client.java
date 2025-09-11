@@ -1,5 +1,6 @@
 package cl.creando.skappserver.workorder.entity;
 
+import cl.creando.skappserver.common.entity.common.AuditableEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import static org.hibernate.annotations.UuidGenerator.Style.TIME;
 @Table(name = "tbl_client")
 @Getter
 @Setter
-public class Client {
+public class Client  extends AuditableEntity {
     @Id
     @GeneratedValue
     @UuidGenerator(style = TIME)

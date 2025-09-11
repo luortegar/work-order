@@ -1,6 +1,7 @@
 package cl.creando.skappserver.workorder.entity;
 
 import cl.creando.skappserver.common.entity.common.AuditableEntity;
+import cl.creando.skappserver.common.entity.common.File;
 import cl.creando.skappserver.common.entity.user.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -53,10 +54,19 @@ public class WorkOrder extends AuditableEntity {
     private Equipment equipment;
 
     private String serviceDetails;
+
     private String observations;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "signature_technician_file_id")
+    private File signatureTechnician;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "signature_recipient_file_id")
+    private File signatureRecipient;
+
     @JsonIgnore
-    @OneToMany(mappedBy = "workOrder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "workOrder", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<WorkOrderPhoto> fileList;
 

@@ -111,7 +111,7 @@
         .contact {
           text-align: center;
           margin-top: 5mm;
-          font-size: 8pt;
+            font-size: 7pt;
           color: #777;
         }
 
@@ -157,8 +157,8 @@
                     <img th:src="${data.logo}" alt="Logo de la empresa"/>
                 </td>
                 <td class="title-cell">
-                    <h1>ORDEN DE TRABAJO #OT967</h1>
-                    <p>TraumaCenter (Rancagua)</p>
+                    <h1>ORDEN DE TRABAJO #<span th:text="${data.workOrderNumber}"></span></h1>
+                    <p th:text="${data.companyName + ' (' + data.branchLocation + ')'}"></p>
                 </td>
             </tr>
         </table>
@@ -168,15 +168,15 @@
         <table class="two-col-table">
             <tr>
                 <td>
-                    <p><strong>Cliente:</strong> Angela Mazo Varas</p>
-                    <p><strong>Teléfono:</strong> +569 9042 4283</p>
-                    <p><strong>Correo:</strong> angelamazov@gmail.com</p>
+                    <p><strong>Cliente:</strong> <span th:text="${data.clientName}"></span></p>
+                    <p><strong>Teléfono:</strong> <span th:text="${data.clientPhone}"></span></p>
+                    <p><strong>Correo:</strong> <span th:text="${data.clientEmail}"></span></p>
                 </td>
                 <td>
-                    <p><strong>Inicio:</strong> 13:00 del 09 de Abril de 2025</p>
-                    <p><strong>Término:</strong> 17:00 del 09 de Abril de 2025</p>
-                    <p><strong>Horas Mano de obra:</strong> 4 hrs.</p>
-                    <p><strong>Horas Traslado:</strong> 3 hrs.</p>
+                    <p><strong>Inicio:</strong> <span th:text="${data.startDateTime}"></span></p>
+                    <p><strong>Término:</strong> <span th:text="${data.endDateTime}"></span></p>
+                    <p><strong>Horas Mano de obra:</strong> <span th:text="${data.laborHours}"></span></p>
+                    <p><strong>Horas Traslado:</strong> <span th:text="${data.travelHours}"></span></p>
                 </td>
             </tr>
         </table>
@@ -184,46 +184,30 @@
     <div class="section details-list">
         <h2>Detalle del Servicio</h2>
         <ul>
-            <li>• Se realiza limpieza interna y externa de CPU NX.</li>
-            <li>• Revisión de servicio y log de eventos.</li>
-            <li>• Se realiza limpieza interna y externa de UPS.</li>
-            <li>• NX 24.0.2900 HP Flex Pro i58500 SN: CZC2267QYV</li>
-            <li>• XD14 VIVIX-S 3643VW SN: VEABCB075</li>
-            <li>• UPS SRVPM1KIL SN: 9S1936A78864 SRV36BP-9A SN:9S1917A29174</li>
+            <li th:each="item : ${data.serviceDetails}" th:text="'• ' + ${item}"></li>
         </ul>
     </div>
     <div class="section observations">
         <h2>Observaciones</h2>
         <ul>
-            <li>Se realizan pruebas de disparo satisfactoriamente.</li>
-            <li>Se reemplaza cable de energía de Cargador de Baterías del Panel.</li>
-            <li>TM Patricia observa alineación de colimador respecto a EasyLift; se requiere escalera y herramientas
-                para ajustar estructura. Se coordinará visita para ajustes.
-            </li>
+            <li th:each="obs : ${data.observations}" th:text="${obs}"></li>
         </ul>
     </div>
     <div class="signatures">
         <table class="sign-table">
             <tr>
-                <td>
+                <td th:each="sig : ${data.signatures}">
                     <div class="sig-line">
-                        <strong>Patricia Pérez</strong><br/>
-                        +569 9545 2854
-                    </div>
-                </td>
-                <td></td>
-                <td>
-                    <div class="sig-line">
-                        <strong>Rubén Lorca</strong><br/>
-                        rlorca@in.geros.cl — +569 3434 8370
+                        <strong th:text="${sig.name}"></strong><br/>
+                        <span th:text="${sig.contact}"></span>
                     </div>
                 </td>
             </tr>
         </table>
     </div>
     <div class="contact">
-        <p>Mantenimiento, reparación, venta de equipos radiográficos y sistema RISPACS.</p>
-        <p>INGEROS SPA. - www.ingeros.cl</p>
+        <p th:text="${data.companyFooterLine1}"></p>
+        <p th:text="${data.companyFooterLine2}"></p>
     </div>
 </div>
 <!-- ========== PÁGINA 2 ========== -->
@@ -236,8 +220,8 @@
                     <img th:src="${data.logo}" alt="Logo de la empresa"/>
                 </td>
                 <td class="title-cell">
-                    <h1>ORDEN DE TRABAJO #OT967</h1>
-                    <p>TraumaCenter (Rancagua)</p>
+                    <h1>ORDEN DE TRABAJO #<span th:text="${data.workOrderNumber}"></span></h1>
+                    <p th:text="${data.companyName + ' (' + data.branchLocation + ')'}"></p>
                 </td>
             </tr>
         </table>
@@ -259,6 +243,10 @@
             </tr>
             </tbody>
         </table>
+    </div>
+    <div class="contact">
+        <p th:text="${data.companyFooterLine1}"></p>
+        <p th:text="${data.companyFooterLine2}"></p>
     </div>
 </div>
 </body>

@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -182,16 +183,93 @@ public class WorkOrderService {
         return new WorkOrderResponse(workOrder);
     }
 
+    @Transactional
     public WorkOrderResponse updateWorkOrder(UUID id, WorkOrderRequest workOrderRequest) {
-        WorkOrder oldWorkOrder = workOrderRepository.getReferenceById(id);
+        WorkOrder oldWorkOrder = workOrderRepository.findById(id)
+                .orElseThrow(() -> new SKException("WorkOrder not found", HttpStatus.NOT_FOUND));
 
-        WorkOrder workOrder = null;
+        // Campos simples
+        oldWorkOrder.setWorkOrderNumber(workOrderRequest.getWorkOrderNumber());
+        oldWorkOrder.setServiceDetails(workOrderRequest.getServiceDetails());
+        oldWorkOrder.setObservations(workOrderRequest.getObservations());
+        oldWorkOrder.setStartTime(workOrderRequest.getStartTime());
+        oldWorkOrder.setEndTime(workOrderRequest.getEndTime());
 
-        return new WorkOrderResponse (workOrderRepository.save(workOrder));
+        // Branch
+        Branch branch = branchRepository.findById(workOrderRequest.getBranchId())
+                .orElseThrow(() -> new SKException("Invalid branchId.", HttpStatus.BAD_REQUEST));
+        oldWorkOrder.setBranch(branch);
+
+        // Recipient
+        if (workOrderRequest.getRecipientId() != null) {
+            User recipient = userRepository.findById(workOrderRequest.getRecipientId())
+                    .orElseThrow(() -> new SKException("Invalid recipientId.", HttpStatus.BAD_REQUEST));
+            oldWorkOrder.setRecipient(recipient);
+        } else {
+            oldWorkOrder.setRecipient(null); // permite limpiar si viene vacío
+        }
+
+        // Technician principal
+        if (workOrderRequest.getTechnicianId() != null) {
+            User technician = userRepository.findById(workOrderRequest.getTechnicianId())
+                    .orElseThrow(() -> new SKException("Invalid technicianId.", HttpStatus.BAD_REQUEST));
+            oldWorkOrder.setTechnician(technician);
+        } else {
+            oldWorkOrder.setTechnician(null);
+        }
+
+        // Equipment principal
+        if (workOrderRequest.getEquipmentId() != null) {
+            Equipment equipment = equipmentRepository.findById(workOrderRequest.getEquipmentId())
+                    .orElseThrow(() -> new SKException("Invalid equipmentId.", HttpStatus.BAD_REQUEST));
+            oldWorkOrder.setEquipment(equipment);
+        } else {
+            oldWorkOrder.setEquipment(null);
+        }
+
+        // Lista de técnicos adicionales
+        oldWorkOrder.getWorkOrderTechnicianList().clear();
+        if (workOrderRequest.getTechnicianIdList() != null && !workOrderRequest.getTechnicianIdList().isEmpty()) {
+            List<WorkOrderTechnician> workOrderTechnicians = workOrderRequest.getTechnicianIdList().stream()
+                    .map(techId -> {
+                        User tech = userRepository.findById(techId)
+                                .orElseThrow(() -> new SKException("Invalid technicianId in list.", HttpStatus.BAD_REQUEST));
+                        WorkOrderTechnician wot = new WorkOrderTechnician();
+                        wot.setWorkOrder(oldWorkOrder);
+                        wot.setTechnician(tech);
+                        return wot;
+                    }).collect(Collectors.toList());
+            oldWorkOrder.getWorkOrderTechnicianList().addAll(workOrderTechnicians);
+        }
+
+        // Lista de fotos
+        oldWorkOrder.getFileList().clear();
+        if (workOrderRequest.getPhotoIdList() != null && !workOrderRequest.getPhotoIdList().isEmpty()) {
+            List<WorkOrderPhoto> photos = workOrderRequest.getPhotoIdList().stream()
+                    .map(photoId -> {
+                        File file = fileRepository.findById(photoId)
+                                .orElseThrow(() -> new SKException("Invalid file id", HttpStatus.BAD_REQUEST));
+                        WorkOrderPhoto photo = new WorkOrderPhoto();
+                        photo.setWorkOrder(oldWorkOrder);
+                        photo.setFile(file);
+                        return photo;
+                    }).collect(Collectors.toList());
+            oldWorkOrder.getFileList().addAll(photos);
+        }
+
+        // Lista de equipos adicionales (si aplica)
+        if (workOrderRequest.getEquipmentIdList() != null && !workOrderRequest.getEquipmentIdList().isEmpty()) {
+            // TODO: manejar WorkOrderEquipment si lo modelaste como entidad intermedia
+        }
+
+        // Guardar y devolver respuesta
+        WorkOrder updated = workOrderRepository.save(oldWorkOrder);
+        return new WorkOrderResponse(updated);
     }
 
+
     public ResponseEntity<Resource> generatePDF(UUID id) throws IOException {
-        WorkOrder oldWorkOrder = workOrderRepository.getReferenceById(id);
+        WorkOrder oldWorkOrder = workOrderRepository.findById(id).orElseThrow(()->new SKException("Invalid work order.", HttpStatus.BAD_REQUEST));
 
         InputStream inputStream = pdfGenerator.generateWorkOrderPdf(oldWorkOrder);
 

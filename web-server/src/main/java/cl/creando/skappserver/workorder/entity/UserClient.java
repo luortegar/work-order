@@ -1,5 +1,6 @@
 package cl.creando.skappserver.workorder.entity;
 
+import cl.creando.skappserver.common.entity.common.AuditableEntity;
 import cl.creando.skappserver.common.entity.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import static org.hibernate.annotations.UuidGenerator.Style.TIME;
 @Table(name = "tbl_user_client")
 @Getter
 @Setter
-public class UserClient {
+public class UserClient  extends AuditableEntity {
     @Id
     @GeneratedValue
     @UuidGenerator(style = TIME)

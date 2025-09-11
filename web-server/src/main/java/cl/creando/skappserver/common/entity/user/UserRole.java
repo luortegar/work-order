@@ -31,7 +31,7 @@ public class UserRole extends AuditableEntity {
     @JoinColumn(name = "userId")
     private User user;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
     @JoinColumn(name = "roleId")
     private Role role;
 
