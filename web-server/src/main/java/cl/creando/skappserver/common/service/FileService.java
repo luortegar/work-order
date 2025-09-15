@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,21 +38,8 @@ public class FileService {
     public FileResponse saveFile(MultipartFile file) {
         log.info("Starting file save: {}", file.getOriginalFilename());
 
-        FileStorageService fileStorageService = fileStorageConfig.fileStorageService();
         try {
-            String filePathId = UUID.randomUUID() + "-" + file.getOriginalFilename();
-            log.debug("Generated filePathId: {}", filePathId);
-
-            String fileFullPath = fileStorageService.saveFile(file, filePathId);
-            log.debug("File stored at physical path: {}", fileFullPath);
-
-            File fileRecord = new File();
-            fileRecord.setFileId(UUID.randomUUID());
-            fileRecord.setFilePath(filePathId);
-            fileRecord.setFileName(file.getOriginalFilename());
-            fileRecord.setContentType(file.getContentType());
-
-            File savedFile = fileRepository.save(fileRecord);
+            File savedFile = getSavedFile(file);
             log.info("File saved in database with ID: {}", savedFile.getFileId());
 
             return new FileResponse(savedFile);
@@ -59,6 +47,24 @@ public class FileService {
             log.error("Error saving file: {}", file.getOriginalFilename(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    public File getSavedFile(MultipartFile file) throws IOException {
+        FileStorageService fileStorageService = fileStorageConfig.fileStorageService();
+
+        String filePathId = UUID.randomUUID() + "-" + file.getOriginalFilename();
+        log.debug("Generated filePathId: {}", filePathId);
+
+        String fileFullPath = fileStorageService.saveFile(file, filePathId);
+        log.debug("File stored at physical path: {}", fileFullPath);
+
+        File fileRecord = new File();
+        fileRecord.setFileId(UUID.randomUUID());
+        fileRecord.setFilePath(filePathId);
+        fileRecord.setFileName(file.getOriginalFilename());
+        fileRecord.setContentType(file.getContentType());
+
+        return fileRepository.save(fileRecord);
     }
 
     public FileResponse findByFileId(UUID id) {
@@ -118,5 +124,9 @@ public class FileService {
             log.error("Error reading file from storage: {}", file.getFilePath(), e);
             throw new SKException("File not found or not readable: " + file.getFilePath(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    public Optional<File> findById(UUID photoId) {
+        return fileRepository.findById(photoId);
     }
 }

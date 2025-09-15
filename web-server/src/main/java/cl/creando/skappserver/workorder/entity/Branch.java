@@ -46,4 +46,9 @@ public class Branch  extends AuditableEntity {
     @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @Fetch(value = FetchMode.SUBSELECT)
     private List<UserBranch> userBranchList;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "branch", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<InspectionVisit> inspectionVisitList;
 }

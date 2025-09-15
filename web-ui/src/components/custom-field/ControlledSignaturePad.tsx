@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Card,
-  Paper,
   Stack,
   Typography,
   useTheme,
@@ -13,25 +12,23 @@ import {
 interface ControlledSignaturePadProps {
   name: string;
   control: Control<any>;
-  width?: number;
   height?: number;
   lineWidth?: number;
   strokeStyle?: string;
   backgroundColor?: string;
   disabled?: boolean;
-  label?:string
+  label?: string;
 }
 
 const ControlledSignaturePad: React.FC<ControlledSignaturePadProps> = ({
   name,
   control,
-  width = 500,
   height = 200,
   lineWidth = 2,
   strokeStyle = "#111827",
   backgroundColor = "#ffffff",
   disabled = false,
-  label
+  label,
 }) => {
   const {
     field: { value, onChange },
@@ -47,12 +44,15 @@ const ControlledSignaturePad: React.FC<ControlledSignaturePadProps> = ({
   const dpr =
     typeof window !== "undefined" ? Math.max(1, window.devicePixelRatio || 1) : 1;
 
+  /** Inicializa el canvas para que use el ancho real del contenedor */
   const initCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    canvas.width = Math.floor(width * dpr);
+
+    const realWidth = canvas.offsetWidth; // ancho actual del contenedor
+    canvas.width = Math.floor(realWidth * dpr);
     canvas.height = Math.floor(height * dpr);
-    canvas.style.width = `${width}px`;
+    canvas.style.width = "100%";
     canvas.style.height = `${height}px`;
 
     const ctx = canvas.getContext("2d");
@@ -61,22 +61,23 @@ const ControlledSignaturePad: React.FC<ControlledSignaturePadProps> = ({
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
-
     ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, width, height);
-
+    ctx.fillRect(0, 0, realWidth, height);
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = strokeStyle;
-  }, [width, height, dpr, backgroundColor, lineWidth, strokeStyle]);
+  }, [height, dpr, backgroundColor, lineWidth, strokeStyle]);
 
-  // Inicializa canvas
   useEffect(() => {
     initCanvas();
+    // Redibuja si cambia el tamaño de la ventana
+    const handleResize = () => initCanvas();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [initCanvas]);
 
-  // Si value tiene base64, se carga en el canvas (modo edición)
+  // Carga la imagen si ya hay firma guardada
   useEffect(() => {
     if (!value) return;
     const canvas = canvasRef.current;
@@ -88,32 +89,25 @@ const ControlledSignaturePad: React.FC<ControlledSignaturePadProps> = ({
     image.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       initCanvas();
-      ctx.drawImage(image, 0, 0, width, height);
+      ctx.drawImage(image, 0, 0, canvas.width / dpr, canvas.height / dpr);
       setSigned(true);
     };
-  }, [value, initCanvas, width, height]);
+  }, [value, initCanvas, dpr]);
 
   const getPos = (e: MouseEvent | TouchEvent) => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
-    let x = 0,
-      y = 0;
     if (e instanceof TouchEvent) {
       const t = e.touches[0] || e.changedTouches[0];
-      x = t.clientX - rect.left;
-      y = t.clientY - rect.top;
-    } else {
-      const m = e as MouseEvent;
-      x = m.clientX - rect.left;
-      y = m.clientY - rect.top;
+      return { x: t.clientX - rect.left, y: t.clientY - rect.top };
     }
-    return { x, y };
+    const m = e as MouseEvent;
+    return { x: m.clientX - rect.left, y: m.clientY - rect.top };
   };
 
   const getImageBase64 = useCallback((): string | null => {
     const canvas = canvasRef.current;
-    if (!canvas) return null;
-    return canvas.toDataURL("image/png");
+    return canvas?.toDataURL("image/png") ?? null;
   }, []);
 
   const startDrawing = (e: MouseEvent | TouchEvent) => {
@@ -155,41 +149,37 @@ const ControlledSignaturePad: React.FC<ControlledSignaturePadProps> = ({
     onChange(null);
   }, [initCanvas, onChange]);
 
-  // Eventos de mouse/touch
+  // Eventos de dibujo
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const handleMouseDown = (e: MouseEvent) => startDrawing(e);
-    const handleMouseMove = (e: MouseEvent) => draw(e);
-    const handleMouseUp = () => endDrawing();
-    const handleMouseLeave = () => endDrawing();
+    const md = (e: MouseEvent) => startDrawing(e);
+    const mm = (e: MouseEvent) => draw(e);
+    const mu = () => endDrawing();
+    const ml = () => endDrawing();
 
-    const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      startDrawing(e);
-    };
-    const handleTouchMove = (e: TouchEvent) => draw(e);
-    const handleTouchEnd = () => endDrawing();
+    const ts = (e: TouchEvent) => { e.preventDefault(); startDrawing(e); };
+    const tm = (e: TouchEvent) => draw(e);
+    const te = () => endDrawing();
 
-    canvas.addEventListener("mousedown", handleMouseDown);
-    canvas.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
+    canvas.addEventListener("mousedown", md);
+    canvas.addEventListener("mousemove", mm);
+    window.addEventListener("mouseup", mu);
+    canvas.addEventListener("mouseleave", ml);
 
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
-    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("touchend", handleTouchEnd);
+    canvas.addEventListener("touchstart", ts, { passive: false });
+    canvas.addEventListener("touchmove", tm, { passive: false });
+    window.addEventListener("touchend", te);
 
     return () => {
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      canvas.removeEventListener("mouseleave", handleMouseLeave);
-
-      canvas.removeEventListener("touchstart", handleTouchStart);
-      canvas.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
+      canvas.removeEventListener("mousedown", md);
+      canvas.removeEventListener("mousemove", mm);
+      window.removeEventListener("mouseup", mu);
+      canvas.removeEventListener("mouseleave", ml);
+      canvas.removeEventListener("touchstart", ts);
+      canvas.removeEventListener("touchmove", tm);
+      window.removeEventListener("touchend", te);
     };
   }, [draw]);
 
@@ -199,35 +189,33 @@ const ControlledSignaturePad: React.FC<ControlledSignaturePadProps> = ({
       sx={{
         p: 2,
         borderRadius: "8px",
-        width: width + 35,
+        width: "100%", // ✅ ancho total
         bgcolor: disabled ? theme.palette.grey[100] : "background.paper",
       }}
     >
-    <Typography
-        variant="body2"
-        color={"text.secondary"}
-    >
-        {label}
-    </Typography>
+      {label && (
+        <Typography variant="body2" color="text.secondary">
+          {label}
+        </Typography>
+      )}
+
       <Stack spacing={2}>
-        {/* Área de firma */}
         <Box
           sx={{
             border: `2px dashed ${theme.palette.secondary.main}`,
             borderRadius: 1,
             overflow: "hidden",
+            width: "100%", // ✅ ancho total
+            height,        // altura fija o la que recibas por prop
             position: "relative",
-            width,
-            height,
-            display: "inline-block",
             bgcolor: disabled ? theme.palette.grey[100] : "#fafafa",
           }}
         >
           <canvas
             ref={canvasRef}
             style={{
-              width,
-              height,
+              width: "100%",      // ✅ ancho total
+              height: `${height}px`,
               backgroundColor,
               opacity: disabled ? 0.6 : 1,
               cursor: disabled ? "not-allowed" : "crosshair",
@@ -236,13 +224,12 @@ const ControlledSignaturePad: React.FC<ControlledSignaturePadProps> = ({
           />
         </Box>
 
-        {/* Estado + Botón limpiar */}
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography
             variant="body2"
             color={signed ? "success.main" : "text.secondary"}
           >
-            {signed ? "Signature captured": "Still no signature"}
+            {signed ? "Signature captured" : "Still no signature"}
           </Typography>
           <Button
             size="small"

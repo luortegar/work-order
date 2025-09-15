@@ -5,12 +5,13 @@ import cl.creando.skappserver.common.CommonFunctions;
 import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.entity.common.File;
 import cl.creando.skappserver.common.exception.SKException;
-import cl.creando.skappserver.common.repository.FileRepository;
 import cl.creando.skappserver.common.repository.UserRepository;
-import cl.creando.skappserver.common.service.PdfGenerator;
+import cl.creando.skappserver.common.response.GenericResponse;
+import cl.creando.skappserver.common.service.FileService;
 import cl.creando.skappserver.workorder.entity.*;
 import cl.creando.skappserver.workorder.repository.BranchRepository;
 import cl.creando.skappserver.workorder.repository.EquipmentRepository;
+import cl.creando.skappserver.workorder.repository.WorkOrderPhotoRepository;
 import cl.creando.skappserver.workorder.repository.WorkOrderRepository;
 import cl.creando.skappserver.workorder.request.WorkOrderRequest;
 import cl.creando.skappserver.workorder.response.DetailedWorkOrderResponse;
@@ -29,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +48,8 @@ public class WorkOrderService {
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
     private final EquipmentRepository equipmentRepository;
-    private final FileRepository fileRepository;
+    private final WorkOrderPhotoRepository workOrderPhotoRepository;
+    private final FileService fileService;
 
 
     public List<WorkOrder> findAll() {
@@ -110,10 +113,11 @@ public class WorkOrderService {
         newWorkOrder.setEndTime(workOrderRequest.getEndTime());
 
         // Branch
-        Branch branch = branchRepository.findById(workOrderRequest.getBranchId())
-                .orElseThrow(() -> new SKException("Invalid branchId.", HttpStatus.BAD_REQUEST));
-        newWorkOrder.setBranch(branch);
-
+        if (workOrderRequest.getBranchId() != null) {
+            Branch branch = branchRepository.findById(workOrderRequest.getBranchId())
+                    .orElseThrow(() -> new SKException("Invalid branchId.", HttpStatus.BAD_REQUEST));
+            newWorkOrder.setBranch(branch);
+        }
         // Recipient
         if (workOrderRequest.getRecipientId() != null) {
             User recipient = userRepository.findById(workOrderRequest.getRecipientId())
@@ -153,7 +157,7 @@ public class WorkOrderService {
         if (workOrderRequest.getPhotoIdList() != null && !workOrderRequest.getPhotoIdList().isEmpty()) {
             List<WorkOrderPhoto> photos = workOrderRequest.getPhotoIdList().stream()
                     .map(photoId -> {
-                        File file = fileRepository.findById(photoId).orElseThrow(()-> new SKException("Invalid file id", HttpStatus.BAD_REQUEST));
+                        File file = fileService.findById(photoId).orElseThrow(()-> new SKException("Invalid file id", HttpStatus.BAD_REQUEST));
                         WorkOrderPhoto photo = new WorkOrderPhoto();
                         photo.setWorkOrder(newWorkOrder);
                         photo.setFile(file);
@@ -247,13 +251,13 @@ public class WorkOrderService {
         if (workOrderRequest.getPhotoIdList() != null && !workOrderRequest.getPhotoIdList().isEmpty()) {
             List<WorkOrderPhoto> photos = workOrderRequest.getPhotoIdList().stream()
                     .map(photoId -> {
-                        File file = fileRepository.findById(photoId)
+                        File file = fileService.findById(photoId)
                                 .orElseThrow(() -> new SKException("Invalid file id", HttpStatus.BAD_REQUEST));
                         WorkOrderPhoto photo = new WorkOrderPhoto();
                         photo.setWorkOrder(oldWorkOrder);
                         photo.setFile(file);
                         return photo;
-                    }).collect(Collectors.toList());
+                    }).toList();
             oldWorkOrder.getFileList().addAll(photos);
         }
 
@@ -276,5 +280,29 @@ public class WorkOrderService {
         InputStreamResource file = new InputStreamResource(inputStream);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "ot.pdf")
                 .contentType(MediaType.APPLICATION_PDF).body(file);
+    }
+
+    public GenericResponse updatePhotoToWorkOrder(UUID id, MultipartFile request) {
+        WorkOrder workOrder = workOrderRepository.findById(id).orElseThrow(() -> new SKException("Invalid id.", HttpStatus.NOT_FOUND));
+        try {
+            File file = fileService.getSavedFile(request);
+            WorkOrderPhoto workOrderPhoto = new WorkOrderPhoto();
+            workOrderPhoto.setWorkOrder(workOrder);
+            workOrderPhoto.setFile(file);
+            workOrderPhotoRepository.save(workOrderPhoto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return GenericResponse.builder().message("File upload successful.").build();
+
+    }
+
+    public GenericResponse deletePhotoToWorkOrder(UUID id, UUID workOrderPhotoId) {
+
+        WorkOrderPhoto workOrderPhoto = workOrderPhotoRepository.findById(workOrderPhotoId).orElseThrow(() -> new SKException("Work Order Photo not found.", HttpStatus.NOT_FOUND));
+        File file = workOrderPhoto.getFile();
+        workOrderPhotoRepository.delete(workOrderPhoto);
+        fileService.deleteFile(file.getFileId());
+        return GenericResponse.builder().message("File deleted successful.").build();
     }
 }

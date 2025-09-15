@@ -9,8 +9,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -41,6 +43,16 @@ public class WorkOrderController {
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateWorkOrder(@PathVariable UUID id, @RequestBody WorkOrderRequest workOrderRequest) {
         return ResponseEntity.ok(workOrderService.updateWorkOrder(id, workOrderRequest));
+    }
+
+    @PatchMapping("/{id}/work-order-photo")
+    public ResponseEntity<Object> updatePhotoToWorkOrder(@PathVariable UUID id, @RequestParam("file") MultipartFile request) {
+        return ResponseEntity.ok(workOrderService.updatePhotoToWorkOrder(id, request));
+    }
+
+    @DeleteMapping("/{id}/work-order-photo/{workOrderPhotoId}")
+    public ResponseEntity<Object> deletePhotoToWorkOrder(@PathVariable UUID id, @PathVariable UUID workOrderPhotoId) {
+        return ResponseEntity.ok(workOrderService.deletePhotoToWorkOrder(id, workOrderPhotoId));
     }
 
     @DeleteMapping("/{id}")

@@ -10,14 +10,12 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { list, viewPDF } from 'src/api/workOrderApi';
+import { create, list, viewPDF } from 'src/api/workOrderApi';
 import { Iconify } from 'src/components/iconify';
 import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
 import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
 import TabContext from '@mui/lab/TabContext';
 import Tab from '@mui/material/Tab';
-import SearchIcon from '@mui/icons-material/Search';
 import SimpleTable from 'src/components/table/simple-table';
 
 export default function WorkOrderList() {
@@ -37,7 +35,7 @@ export default function WorkOrderList() {
       flex: 0.3,
       renderCell: (params: GridRenderCellParams) => {
         const id: string = params.value;
-        const shortId = id ? '...'+id.slice(-8) : ''; // últimos 8 caracteres
+        const shortId = id ? '...' + id.slice(-8) : ''; // últimos 8 caracteres
 
         return (
           <Chip
@@ -90,6 +88,14 @@ export default function WorkOrderList() {
     setWorkOrderStatus(newValue === '1' ? 'DRAFT' : 'SENT');
   };
 
+  function createNewOrder() {
+    create({}).then(resp=>{
+      const workOrderId = resp?.data?.workOrderId;
+      console.log("resp", resp.data.workOrderId);
+      navigate(`/home/work-order/${workOrderId}`);
+    })
+  }
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Header */}
@@ -99,9 +105,9 @@ export default function WorkOrderList() {
         </Typography>
         <Button
           variant="contained"
+          color='inherit'
           startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={() => navigate(`/home/work-order/new`)}
-          sx={{ borderRadius: 3 }}
+          onClick={()=>createNewOrder()}
         >
           New Work Order
         </Button>
@@ -121,14 +127,14 @@ export default function WorkOrderList() {
               <Tab label="Sent" value="2" />
             </TabList>
           </Box>
-                  <SimpleTable
-          columns={columns}
-          refreshData={refreshData}
-          dataList={dataList}
-          rowCount={rowCount}
-          getRowId={(row) => row.workOrderId}
-          pageSizeDefault={5}
-        />
+          <SimpleTable
+            columns={columns}
+            refreshData={refreshData}
+            dataList={dataList}
+            rowCount={rowCount}
+            getRowId={(row) => row.workOrderId}
+            pageSizeDefault={5}
+          />
         </TabContext>
       </Paper>
     </Container>

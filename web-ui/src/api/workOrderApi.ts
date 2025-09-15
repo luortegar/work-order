@@ -1,15 +1,15 @@
 import axios from './axiosInstance'
 import { DetailedWorkOrderResponse } from './types/workOrderTypes';
 
-export const view = async (id: string):Promise<DetailedWorkOrderResponse> => {
-    const {data} = await axios.get<DetailedWorkOrderResponse>(`/private/v1/work-orders/${id}`)
+export const view = async (id: string): Promise<DetailedWorkOrderResponse> => {
+    const { data } = await axios.get<DetailedWorkOrderResponse>(`/private/v1/work-orders/${id}`)
     return data;
 }
 
-export const list = async (size : number = 10, page : number = 0, sort : string = '', searchTerm : string = '', workOrderStatus : string|null = null) => 
+export const list = async (size: number = 10, page: number = 0, sort: string = '', searchTerm: string = '', workOrderStatus: string | null = null) =>
     axios.get(`/private/v1/work-orders?size=${size}&page=${page}&sort=${sort}&searchTerm=${searchTerm}&workOrderStatus=${workOrderStatus}`)
 
-export const create = async (payload: any) => 
+export const create = async (payload: any) =>
     axios.post(`/private/v1/work-orders`, payload)
 export const update = async (id: string, payload: any) =>
     axios.put(`/private/v1/work-orders/${id}`, payload)
@@ -19,7 +19,7 @@ export const deleteById = async (id: string) =>
 
 export const viewPDF1 = async (id: string) =>
     axios.get(`/private/v1/work-orders/${id}/pdf`)
-    
+
 export const viewPDF = async (id: string) => {
     try {
         // Hacer la solicitud con responseType 'blob' para manejar archivos
@@ -44,3 +44,13 @@ export const viewPDF = async (id: string) => {
         console.error("Error al descargar el archivo PDF:", error);
     }
 };
+
+export const uploadPhoto = async (file: File, id: string) => {
+    const data = new FormData();
+    data.append('file', file);
+    return await axios.patch(`/private/v1/work-orders/${id}/work-order-photo`, data, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    })
+}

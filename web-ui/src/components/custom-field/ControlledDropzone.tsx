@@ -7,9 +7,11 @@ interface ControlledDropzoneProps {
   name: string;
   control: Control<any>;
   label: string;
+  uploadFile: (file : File) => void
 }
 
 const DropzoneContainer = styled(Box)(({ theme }) => ({
+  width: "100%", // ✅ ocupa todo el ancho
   border: `2px dashed ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(4),
@@ -25,13 +27,13 @@ const ControlledDropzone: React.FC<ControlledDropzoneProps> = ({
   name,
   control,
   label,
+  uploadFile
 }) => {
   const { field } = useController({ name, control });
 
   const theme = useTheme();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Mantiene sincronizado el estado local con el valor de React Hook Form
   useEffect(() => {
     if (field.value instanceof File) {
       setSelectedFile(field.value);
@@ -40,13 +42,13 @@ const ControlledDropzone: React.FC<ControlledDropzoneProps> = ({
     }
   }, [field.value]);
 
-  // Callback de dropzone
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
         setSelectedFile(file);
         field.onChange(file);
+        uploadFile(file)
       }
     },
     [field]
@@ -59,7 +61,8 @@ const ControlledDropzone: React.FC<ControlledDropzoneProps> = ({
   });
 
   return (
-    <Stack spacing={2} alignItems="center">
+    <Stack spacing={2} width="100%">
+      {/* ✅ ancho completo, altura auto */}
       <DropzoneContainer {...getRootProps()}>
         <input {...getInputProps()} />
         {selectedFile ? (
@@ -73,7 +76,6 @@ const ControlledDropzone: React.FC<ControlledDropzoneProps> = ({
         )}
       </DropzoneContainer>
 
-      {/* Preview opcional */}
       {selectedFile && (
         <Box
           mt={1}
@@ -81,13 +83,13 @@ const ControlledDropzone: React.FC<ControlledDropzoneProps> = ({
             border: `1px solid ${theme.palette.divider}`,
             borderRadius: 1,
             p: 1,
-            maxWidth: 200,
+            width: "100%",
           }}
         >
           <img
             src={URL.createObjectURL(selectedFile)}
             alt="preview"
-            style={{ maxWidth: "100%", borderRadius: 4 }}
+            style={{ width: "100%", height: "auto", borderRadius: 4 }}
           />
         </Box>
       )}
