@@ -2,10 +2,11 @@ package cl.creando.skappserver.workorder.service;
 
 
 import cl.creando.skappserver.common.CommonFunctions;
-import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.entity.common.File;
+import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.repository.UserRepository;
+import cl.creando.skappserver.common.response.FileResponse;
 import cl.creando.skappserver.common.response.GenericResponse;
 import cl.creando.skappserver.common.service.FileService;
 import cl.creando.skappserver.workorder.entity.*;
@@ -51,29 +52,9 @@ public class WorkOrderService {
     private final WorkOrderPhotoRepository workOrderPhotoRepository;
     private final FileService fileService;
 
-
-    public List<WorkOrder> findAll() {
-        return workOrderRepository.findAll();
-    }
-
-    public ResponseEntity<?> findAllOld(String searchTerm, WorkOrderStatus workOrderStatus, Pageable pageable) {
-        Specification<WorkOrder> specification = (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = List.of(
-                    criteriaBuilder.like(root.get("workOrderId").as(String.class), CommonFunctions.getPattern(searchTerm)),
-                    criteriaBuilder.like(root.get("workOrderNumber"), CommonFunctions.getPattern(searchTerm))
-            );
-            //noinspection ToArrayCallWithZeroLengthArrayArgument
-            return criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
-        };
-        Page<WorkOrder> all = workOrderRepository.findAll(specification, pageable);
-        List<WorkOrderResponse> list = all.map(WorkOrderResponse::new).stream().toList();
-        //noinspection unchecked,rawtypes
-        Page page = new PageImpl(list, all.getPageable(), all.getTotalElements());
-        return ResponseEntity.ok(page);
-    }
-
     public ResponseEntity<?> findAll(String searchTerm, WorkOrderStatus workOrderStatus, Pageable pageable) {
         Specification<WorkOrder> specification = (root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.desc(root.get("updateDate")));
             List<Predicate> predicates = new ArrayList<>();
             // Search by ID or Number
             predicates.add(criteriaBuilder.like(root.get("workOrderId").as(String.class), CommonFunctions.getPattern(searchTerm)));
@@ -99,7 +80,20 @@ public class WorkOrderService {
 
 
     public DetailedWorkOrderResponse findById(UUID id) {
-        return new DetailedWorkOrderResponse(workOrderRepository.findById(id).orElseThrow(() -> new SKException("Invalid id.", HttpStatus.NOT_FOUND)));
+
+        WorkOrder workOrder = workOrderRepository.findById(id).orElseThrow(() -> new SKException("Invalid id.", HttpStatus.NOT_FOUND));
+        String signatureRecipientAsBase64 = workOrder.getSignatureRecipient() != null ? fileService.getFileAsBase64(workOrder.getSignatureRecipient().getFileId()) : null;
+        String signatureTechnicianAsBase64 = workOrder.getSignatureTechnician() != null ? fileService.getFileAsBase64(workOrder.getSignatureTechnician().getFileId()) : null;
+
+        List<WorkOrderPhoto> workOrderFileList = workOrder.getFileList();
+        List<FileResponse> fileResponseList = workOrderFileList.stream().map(f -> fileService.getFileResponse(f.getWorkOrderPhotoId(), f.getFile())).toList();
+
+        DetailedWorkOrderResponse detailedWorkOrderResponse = new DetailedWorkOrderResponse(workOrder);
+        detailedWorkOrderResponse.setRecipientSignatureBase64(signatureRecipientAsBase64);
+        detailedWorkOrderResponse.setTechnicianSignatureBase64(signatureTechnicianAsBase64);
+        detailedWorkOrderResponse.setListOfPhotos(fileResponseList);
+
+        return detailedWorkOrderResponse;
     }
 
     public WorkOrderResponse save(WorkOrderRequest workOrderRequest) {
@@ -200,10 +194,11 @@ public class WorkOrderService {
         oldWorkOrder.setEndTime(workOrderRequest.getEndTime());
 
         // Branch
-        Branch branch = branchRepository.findById(workOrderRequest.getBranchId())
-                .orElseThrow(() -> new SKException("Invalid branchId.", HttpStatus.BAD_REQUEST));
-        oldWorkOrder.setBranch(branch);
-
+        if (workOrderRequest.getBranchId() != null) {
+            Branch branch = branchRepository.findById(workOrderRequest.getBranchId())
+                    .orElseThrow(() -> new SKException("Invalid branchId.", HttpStatus.BAD_REQUEST));
+            oldWorkOrder.setBranch(branch);
+        }
         // Recipient
         if (workOrderRequest.getRecipientId() != null) {
             User recipient = userRepository.findById(workOrderRequest.getRecipientId())
@@ -246,24 +241,29 @@ public class WorkOrderService {
             oldWorkOrder.getWorkOrderTechnicianList().addAll(workOrderTechnicians);
         }
 
-        // Lista de fotos
-        oldWorkOrder.getFileList().clear();
-        if (workOrderRequest.getPhotoIdList() != null && !workOrderRequest.getPhotoIdList().isEmpty()) {
-            List<WorkOrderPhoto> photos = workOrderRequest.getPhotoIdList().stream()
-                    .map(photoId -> {
-                        File file = fileService.findById(photoId)
-                                .orElseThrow(() -> new SKException("Invalid file id", HttpStatus.BAD_REQUEST));
-                        WorkOrderPhoto photo = new WorkOrderPhoto();
-                        photo.setWorkOrder(oldWorkOrder);
-                        photo.setFile(file);
-                        return photo;
-                    }).toList();
-            oldWorkOrder.getFileList().addAll(photos);
-        }
 
         // Lista de equipos adicionales (si aplica)
         if (workOrderRequest.getEquipmentIdList() != null && !workOrderRequest.getEquipmentIdList().isEmpty()) {
             // TODO: manejar WorkOrderEquipment si lo modelaste como entidad intermedia
+        }
+
+        if (oldWorkOrder.getSignatureRecipient() != null) {
+            fileService.deleteFile(oldWorkOrder.getSignatureRecipient().getFileId());
+        }
+
+        if (oldWorkOrder.getSignatureTechnician() != null) {
+            fileService.deleteFile(oldWorkOrder.getSignatureTechnician().getFileId());
+        }
+
+        String recipientSignatureBase64 = workOrderRequest.getRecipientSignatureBase64();
+        if(recipientSignatureBase64 != null) {
+            File recipientSignatureFile = fileService.saveFileBase64(recipientSignatureBase64, "recipientSignature.png");
+            oldWorkOrder.setSignatureRecipient(recipientSignatureFile);
+        }
+        String technicianSignatureBase64 = workOrderRequest.getTechnicianSignatureBase64();
+        if(technicianSignatureBase64 !=null) {
+            File technicianSignatureFile = fileService.saveFileBase64(technicianSignatureBase64, "technicianSignature.png");
+            oldWorkOrder.setSignatureTechnician(technicianSignatureFile);
         }
 
         // Guardar y devolver respuesta
@@ -272,14 +272,19 @@ public class WorkOrderService {
     }
 
 
-    public ResponseEntity<Resource> generatePDF(UUID id) throws IOException {
+    public ResponseEntity<Resource> generatePDFDownload(UUID id) throws IOException {
+        InputStreamResource file = generatePDFInputStreamResource(id);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "ot.pdf")
+                .contentType(MediaType.APPLICATION_PDF).body(file);
+    }
+
+    private InputStreamResource generatePDFInputStreamResource(UUID id) throws IOException {
         WorkOrder oldWorkOrder = workOrderRepository.findById(id).orElseThrow(()->new SKException("Invalid work order.", HttpStatus.BAD_REQUEST));
 
         InputStream inputStream = pdfGenerator.generateWorkOrderPdf(oldWorkOrder);
 
         InputStreamResource file = new InputStreamResource(inputStream);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "ot.pdf")
-                .contentType(MediaType.APPLICATION_PDF).body(file);
+        return file;
     }
 
     public GenericResponse updatePhotoToWorkOrder(UUID id, MultipartFile request) {
@@ -304,5 +309,31 @@ public class WorkOrderService {
         workOrderPhotoRepository.delete(workOrderPhoto);
         fileService.deleteFile(file.getFileId());
         return GenericResponse.builder().message("File deleted successful.").build();
+    }
+
+    public Object viewPhotosOfAWorkOrder(UUID id) {
+        WorkOrder workOrder = workOrderRepository.findById(id).orElseThrow(() -> new SKException("Invalid id.", HttpStatus.NOT_FOUND));
+        List<WorkOrderPhoto> workOrderFileList = workOrder.getFileList();
+        return workOrderFileList.stream().map(f -> fileService.getFileResponse(f.getWorkOrderPhotoId(), f.getFile())).toList();
+    }
+
+    public ResponseEntity<Resource> generatePDFPreview(UUID id) throws IOException {
+        InputStreamResource file = generatePDFInputStreamResource(id);
+
+
+        ResponseEntity<Resource>  response = ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(file);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.putAll(response.getHeaders());
+        headers.remove("X-Frame-Options");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(response.getBody());
     }
 }

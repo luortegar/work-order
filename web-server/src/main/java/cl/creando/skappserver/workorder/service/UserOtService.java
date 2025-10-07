@@ -62,11 +62,14 @@ public class UserOtService {
     private final UserRoleRepository userRoleRepository;
 
     public Page<?> findAll(String searchTerm, Pageable pageable) {
-        Specification<User> specification = (root, query, criteriaBuilder) -> criteriaBuilder.or(
-                criteriaBuilder.like(root.get("firstName"), CommonFunctions.getPattern(searchTerm)),
-                criteriaBuilder.like(root.get("lastName"), CommonFunctions.getPattern(searchTerm)),
-                criteriaBuilder.like(root.get("email"), CommonFunctions.getPattern(searchTerm))
-        );
+        Specification<User> specification = ((root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.desc(root.get("updateDate")));
+            return criteriaBuilder.or(
+            criteriaBuilder.like(root.get("firstName"), CommonFunctions.getPattern(searchTerm)),
+            criteriaBuilder.like(root.get("lastName"), CommonFunctions.getPattern(searchTerm)),
+            criteriaBuilder.like(root.get("email"), CommonFunctions.getPattern(searchTerm))
+    );
+        });
         Page<User> all = userRepository.findAll(specification, pageable);
         List<UserResponse> list = all.map(UserResponse::new).stream().toList();
         return new PageImpl<>(list, all.getPageable(), all.getTotalElements());
@@ -188,6 +191,8 @@ public class UserOtService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .build();
+        user = userRepository.save(user);
+
         UserClient userClient = new UserClient();
         userClient.setClient(client);
         userClient.setUser(user);
@@ -208,7 +213,7 @@ public class UserOtService {
             userBranchRepository.save(userBranch);
         }
 
-        return new UserResponse(userRepository.save(user));
+        return new UserResponse(user);
     }
 
     public Object findAllByBranchId(UUID branchId, String searchTerm, Pageable pageable) {

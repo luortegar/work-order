@@ -1,7 +1,6 @@
 package cl.creando.skappserver.workorder.entity;
 
 import cl.creando.skappserver.common.entity.common.AuditableEntity;
-import cl.creando.skappserver.common.entity.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

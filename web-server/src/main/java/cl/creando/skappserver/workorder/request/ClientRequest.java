@@ -2,10 +2,10 @@ package cl.creando.skappserver.workorder.request;
 
 import cl.creando.skappserver.workorder.entity.Client;
 import cl.creando.skappserver.workorder.entity.TypeOfPurchase;
-import lombok.Getter;
-import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import lombok.Getter;
+import lombok.Setter;
 
 
 @Setter

@@ -11,6 +11,7 @@ const View = lazy(() => import('../sections/work-order/work-order-view'));
 export default function WorkOrderPage() {
   const routes = useRoutes([
     { path: '/:id', element: <Suspense fallback={<div>Loading...</div>}><View /></Suspense> },
+    { path: '/:id?edit=on', element: <Suspense fallback={<div>Loading...</div>}><View /></Suspense> },
     { path: '/', element: <Suspense fallback={<div>Loading...</div>}><List /></Suspense> },
   ]);
 

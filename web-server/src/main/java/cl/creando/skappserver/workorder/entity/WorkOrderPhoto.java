@@ -25,7 +25,7 @@ public class WorkOrderPhoto  extends AuditableEntity {
     @JoinColumn(name = "photo_file_id")
     private File file;
 
-    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     @JoinColumn(name = "workOrderId")
     private WorkOrder workOrder;
 }

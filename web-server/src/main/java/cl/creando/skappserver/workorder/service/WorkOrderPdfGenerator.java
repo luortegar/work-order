@@ -1,6 +1,7 @@
 package cl.creando.skappserver.workorder.service;
 
 import cl.creando.skappserver.common.entity.user.User;
+import cl.creando.skappserver.common.service.FileService;
 import cl.creando.skappserver.common.service.ImageBase64Util;
 import cl.creando.skappserver.workorder.entity.WorkOrder;
 import cl.creando.skappserver.workorder.entity.WorkOrderPhoto;
@@ -24,6 +25,7 @@ import java.util.*;
 public class WorkOrderPdfGenerator {
 
     private final SpringTemplateEngine templateEngine;
+    private final FileService fileService;
 
 
     public InputStream generateWorkOrderPdf(WorkOrder workOrder) throws IOException {
@@ -86,12 +88,14 @@ public class WorkOrderPdfGenerator {
         List<Map<String, String>> signatures = new ArrayList<>();
         if (workOrder.getTechnician() != null) {
             signatures.add(Map.of(
+                    "signaturesImg", fileService.getFileAsBase64(workOrder.getSignatureTechnician().getFileId()),
                     "name", workOrder.getTechnician().getFullName(),
                     "contact", workOrder.getTechnician().getEmail() + " — " + workOrder.getTechnician().getPhone()
             ));
         }
         if (recipient != null) {
             signatures.add(Map.of(
+                    "signaturesImg", fileService.getFileAsBase64(workOrder.getSignatureRecipient().getFileId()),
                     "name", recipient.getFullName(),
                     "contact", recipient.getEmail() + " — " + recipient.getPhone()
             ));
@@ -106,9 +110,9 @@ public class WorkOrderPdfGenerator {
         List<String> photoList = new ArrayList<>();
         if (workOrder.getFileList() != null) {
             for (WorkOrderPhoto photo : workOrder.getFileList()) {
-                // if (photo.getFile() != null && photo.getFile().getPath() != null) {
-                //     photoList.add(ImageBase64Util.getImageAsBase64(photo.getFile().getPath()));
-                // }
+                if (photo.getFile() != null && photo.getFile() != null) {
+                    photoList.add(fileService.getFileAsBase64(photo.getFile().getFileId()));
+                }
             }
         }
         data.put("photoList", photoList);

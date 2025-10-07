@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -50,8 +49,13 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.updatePhotoToWorkOrder(id, request));
     }
 
+    @GetMapping("/{id}/work-order-photo")
+    public ResponseEntity<Object> viewPhotosOfAWorkOrder(@PathVariable UUID id) {
+        return ResponseEntity.ok(workOrderService.viewPhotosOfAWorkOrder(id));
+    }
+
     @DeleteMapping("/{id}/work-order-photo/{workOrderPhotoId}")
-    public ResponseEntity<Object> deletePhotoToWorkOrder(@PathVariable UUID id, @PathVariable UUID workOrderPhotoId) {
+    public ResponseEntity<Object> deletePhotoOfAWorkOrder(@PathVariable UUID id, @PathVariable UUID workOrderPhotoId) {
         return ResponseEntity.ok(workOrderService.deletePhotoToWorkOrder(id, workOrderPhotoId));
     }
 
@@ -62,7 +66,7 @@ public class WorkOrderController {
 
     @GetMapping("/{id}/pdf")
     public ResponseEntity<Resource> viewPDF(@PathVariable UUID id) throws IOException {
-        return workOrderService.generatePDF(id);
+        return workOrderService.generatePDFDownload(id);
     }
 
 }

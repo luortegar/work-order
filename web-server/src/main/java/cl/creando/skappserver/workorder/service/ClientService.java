@@ -27,7 +27,7 @@ public class ClientService {
 
     public Page<?> findAll(String searchTerm, Pageable pageable) {
         Specification<Client> specification = (root, query, criteriaBuilder) -> {
-            query.orderBy(criteriaBuilder.desc(root.get("creationDate")));
+            query.orderBy(criteriaBuilder.desc(root.get("updateDate")));
             return criteriaBuilder.or(
                     criteriaBuilder.like(root.get("companyName"), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(root.get("uniqueTaxpayerIdentification"), CommonFunctions.getPattern(searchTerm)),

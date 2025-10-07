@@ -31,6 +31,7 @@ public class SecurityConfiguration {
                 .requestMatchers(new MvcRequestMatcher(introspector, "/**")).permitAll()
 
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/authenticate")).permitAll()
+                .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/work-orders/*/ot.pdf")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/pfdExample")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/refresh-token")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/public/v1/auth/register")).permitAll()
@@ -44,6 +45,7 @@ public class SecurityConfiguration {
                 .requestMatchers(new MvcRequestMatcher(introspector, "/v3/api-docs")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/v3/api-docs/swagger-config")).permitAll()
                 .requestMatchers(new MvcRequestMatcher(introspector, "/swagger-ui/*")).permitAll()
+
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -52,6 +54,9 @@ public class SecurityConfiguration {
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+
         return http.build();
     }
 }

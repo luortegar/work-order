@@ -13,7 +13,6 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -22,11 +21,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -39,6 +35,7 @@ public class BranchService {
     public Page<?> findAll(UUID clientId, String searchTerm, Pageable pageable) {
         Client client = clientRepository.findById(clientId).orElseThrow(() -> new SKException("Client not found.", HttpStatus.NOT_FOUND));
         Specification<Branch> specification = ((root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.desc(root.get("updateDate")));
             Predicate predicateOr = criteriaBuilder.or(
 
                     criteriaBuilder.like(root.get("branchId").as(String.class), CommonFunctions.getPattern(searchTerm)),

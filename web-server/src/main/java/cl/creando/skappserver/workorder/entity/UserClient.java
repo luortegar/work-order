@@ -22,7 +22,7 @@ public class UserClient  extends AuditableEntity {
     @Column(name = "user_client_id")
     private UUID userClientId;
 
-    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "userId")
     private User user;
 

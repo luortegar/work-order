@@ -2,10 +2,10 @@ package cl.creando.skappserver.common.service;
 
 
 import cl.creando.skappserver.common.CommonFunctions;
-import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.entity.user.Privilege;
 import cl.creando.skappserver.common.entity.user.Role;
 import cl.creando.skappserver.common.entity.user.RolePrivilege;
+import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.repository.PrivilegeRepository;
 import cl.creando.skappserver.common.repository.RolePrivilegeRepository;
 import cl.creando.skappserver.common.repository.RoleRepository;

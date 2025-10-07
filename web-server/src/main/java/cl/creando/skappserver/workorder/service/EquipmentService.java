@@ -2,7 +2,6 @@ package cl.creando.skappserver.workorder.service;
 
 import cl.creando.skappserver.common.CommonFunctions;
 import cl.creando.skappserver.common.exception.SKException;
-import cl.creando.skappserver.workorder.response.EquipmentTypeResponse;
 import cl.creando.skappserver.workorder.entity.Branch;
 import cl.creando.skappserver.workorder.entity.Equipment;
 import cl.creando.skappserver.workorder.entity.EquipmentType;
@@ -10,8 +9,9 @@ import cl.creando.skappserver.workorder.repository.BranchRepository;
 import cl.creando.skappserver.workorder.repository.EquipmentRepository;
 import cl.creando.skappserver.workorder.repository.EquipmentTypeRepository;
 import cl.creando.skappserver.workorder.request.EquipmentRequest;
-import cl.creando.skappserver.workorder.response.EquipmentResponse;
 import cl.creando.skappserver.workorder.response.EquipmentAutocompleteResponse;
+import cl.creando.skappserver.workorder.response.EquipmentResponse;
+import cl.creando.skappserver.workorder.response.EquipmentTypeResponse;
 import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,6 +36,7 @@ public class EquipmentService {
     public Page<?> findAll(UUID branchId, String searchTerm, Pageable pageable) {
         Branch branch = branchRepository.findById(branchId).orElseThrow(() -> new SKException("Item not found.", HttpStatus.NOT_FOUND));
         Specification<Equipment> specification = ((root, query, criteriaBuilder) -> {
+            query.orderBy(criteriaBuilder.desc(root.get("updateDate")));
             Predicate predicateOr = criteriaBuilder.or(
                     criteriaBuilder.like(root.get("equipmentId").as(String.class), CommonFunctions.getPattern(searchTerm)),
                     criteriaBuilder.like(root.get("equipmentModel"), CommonFunctions.getPattern(searchTerm)),

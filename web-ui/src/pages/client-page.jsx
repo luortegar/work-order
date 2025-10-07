@@ -17,6 +17,9 @@ const EquipmentView = lazy(() => import('../sections/client/equipment/view/equip
 const BranchEmployeesList = lazy(() => import('../sections/client/branch-employees/view/employees-list'));
 const BranchEmployeesView = lazy(() => import('../sections/client/branch-employees/view/employees-view'));
 
+const InspectionVisitList = lazy(() => import('../sections/client/inspectionVisit/view/inspectionVisit-list'));
+const InspectionVisitView = lazy(() => import('../sections/client/inspectionVisit/view/inspectionVisit-view'));
+
 // ----------------------------------------------------------------------
 
 export default function WorkOrderPage() {
@@ -33,6 +36,9 @@ export default function WorkOrderPage() {
 
     { path: '/:clientId/branch/:branchId/employees', element: <Suspense fallback={<div>Loading...</div>}><BranchEmployeesList /></Suspense> },
     { path: '/:clientId/branch/:branchId/employees/:userId', element: <Suspense fallback={<div>Loading...</div>}><BranchEmployeesView /></Suspense> },
+
+    { path: '/:clientId/branch/:branchId/inspectionVisit', element: <Suspense fallback={<div>Loading...</div>}><InspectionVisitList /></Suspense> },
+    { path: '/:clientId/branch/:branchId/inspectionVisit/:inspectionVisitId', element: <Suspense fallback={<div>Loading...</div>}><InspectionVisitView /></Suspense> },
 
 
     { path: '', element: <Suspense fallback={<div>Loading...</div>}><List /></Suspense> },

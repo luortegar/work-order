@@ -11,10 +11,10 @@ import java.util.UUID;
 @Setter
 public class FileResponse {
     private UUID fileId;
+    private UUID referenceId;
     private String fileName;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String link;
-
 
     public FileResponse(File file) {
         this.fileId = file.getFileId();
@@ -25,5 +25,12 @@ public class FileResponse {
         this.fileId = file.getFileId();
         this.fileName = file.getFileName();
         this.link = host + "/public/v1/files/" + file.getFileId().toString() + "/download";
+    }
+
+    public FileResponse(File file, String host, UUID referenceId) {
+        this.fileId = file.getFileId();
+        this.fileName = file.getFileName();
+        this.link = host + "/public/v1/files/" + file.getFileId().toString() + "/download";
+        this.referenceId = referenceId;
     }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Container,
@@ -20,7 +20,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { useSnackbar } from 'src/context/snackbar/SnackbarContext';
-import { view, update, create, deleteById, uploadPhoto } from 'src/api/workOrderApi';
+import { viewWorkOrder, update, create, deleteById, uploadPhoto, viewPhotosOfAWorkOrder, deletePhotoOfAWorkOrder } from 'src/api/workOrderApi';
 import { autocompleteBranch } from 'src/api/branchApi';
 import { autocompleteEquipmentAndFilterByBranchId } from 'src/api/equipmentApi';
 import { autocompleteEmployeesAndFilterByBranchId } from 'src/api/employeesApi';
@@ -29,8 +29,11 @@ import { BranchAutocompleteResponse } from 'src/api/types/branchTypes';
 import { EquipmentAutocompleteResponse } from 'src/api/types/equitmentTypes';
 import { UserAutocompleteResponse } from 'src/api/types/employeesTypes';
 import ControlledAutocomplete from 'src/components/custom-field/ControlledAutocomplete';
-import ControlledDropzone from 'src/components/custom-field/ControlledDropzone';
 import ControlledSignaturePad from 'src/components/custom-field/ControlledSignaturePad';
+import SimpleDropzone from 'src/sections/work-order/PhotoDropzone';
+import PhotoGallery from './PhotoGallery';
+import { FileResponse } from 'src/api/types/commonTypes';
+import PDFViewer from 'src/components/pdf-viewer';
 
 interface WorkOrderForm {
   workOrderId: string;
@@ -50,12 +53,15 @@ interface WorkOrderForm {
 export default function WorkOrderView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isEdit = searchParams.get('edit');
+
   const { showMessage } = useSnackbar();
   const theme = useTheme();
 
   const isCreating = id === 'new';
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(isEdit==="on");
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
 
@@ -63,6 +69,7 @@ export default function WorkOrderView() {
   const [equipmentOptions, setEquipmentOptions] = useState<EquipmentAutocompleteResponse[]>([]);
   const [employeesOptions, setEmployeesOptions] = useState<UserAutocompleteResponse[]>([]);
   const [techniciansOptions, setTechniciansOptions] = useState<UserAutocompleteResponse[]>([]);
+  const [openViewPDFDialog, setOpenViewPDFDialog] = useState(false);
 
   const { register, handleSubmit, reset, control, watch, setValue } = useForm<WorkOrderForm>({
     defaultValues: {
@@ -83,6 +90,8 @@ export default function WorkOrderView() {
 
   const branchId = watch('branchId');
 
+  const [photoList, setPhotoList] = useState<FileResponse[]>([])
+
   const fetchBranch = useCallback((q: string) => {
     autocompleteBranch(q).then(setBranchOptions);
   }, []);
@@ -101,11 +110,11 @@ export default function WorkOrderView() {
     autocompleteTechnicians(q).then(setTechniciansOptions);
   }, []);
 
-  const uploadFile = (file:File) => {
-    if(id){
-      uploadPhoto(file,id )
-    }
-  };
+  const refreshPhotoIdList = () =>{
+    viewPhotosOfAWorkOrder(id!).then((resp)=>{
+      setPhotoList(resp)
+    })
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -113,10 +122,12 @@ export default function WorkOrderView() {
       if (!id) return;
 
       try {
-        const response = await view(id);
+        const response = await viewWorkOrder(id);
         const [branches, techs] = await Promise.all([autocompleteBranch(''), autocompleteTechnicians('')]);
         setBranchOptions(branches);
         setTechniciansOptions(techs);
+
+        refreshPhotoIdList()
 
         if (response.branchId) {
           const [equip, emp] = await Promise.all([
@@ -182,6 +193,14 @@ export default function WorkOrderView() {
     );
   }
 
+  const viewPDF = () => {
+
+  }
+
+    const sendWorkOrder = () => {
+
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Container maxWidth="xl">
@@ -200,11 +219,17 @@ export default function WorkOrderView() {
               </>
             ) : (
               <>
-                <Button variant="contained" color="warning" onClick={() => setOpenConfirmDialog(true)}>
+                <Button variant="contained" color="error" onClick={() => setOpenConfirmDialog(true)}>
                   Delete
                 </Button>
                 <Button variant="contained" onClick={() => setEditing(true)}>
                   Edit
+                </Button>
+                <Button variant="contained" color="info" onClick={() => setOpenViewPDFDialog(true)}>
+                  View PDF
+                </Button>
+                <Button variant="contained" color="success" onClick={() => sendWorkOrder()}>
+                  Send
                 </Button>
                 <Button variant="contained" color="inherit" onClick={() => navigate('/home/work-order')}>
                   Back to List
@@ -281,7 +306,6 @@ export default function WorkOrderView() {
               </Grid>
             )}
 
-
             {branchId && (
               <Grid size={{ xs: 12, md: 6 }}>
                 <Stack spacing={2}>
@@ -351,7 +375,7 @@ export default function WorkOrderView() {
                 direction={{ xs: 'column', md: 'row' }}
                 alignItems="stretch"
               >
-                <ControlledSignaturePad label="Recipient signature" name="recipientSignatureBase64" control={control} />
+                <ControlledSignaturePad label="Recipient signature" name="recipientSignatureBase64" control={control} disabled={!editing && !isCreating}/>
               </Stack>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
@@ -360,14 +384,21 @@ export default function WorkOrderView() {
                 direction={{ xs: 'column', md: 'row' }}
                 alignItems="stretch"
               >
-                <ControlledSignaturePad label="Technician signature" name="technicianSignatureBase64" control={control} />
+                <ControlledSignaturePad label="Technician signature" name="technicianSignatureBase64" control={control} disabled={!editing && !isCreating}/>
               </Stack>
             </Grid>
-
             <Grid size={12}>
-              <ControlledDropzone uploadFile={uploadFile} name="profileImage" control={control} label="Drag or select your file." />
+              {photoList && 
+                <PhotoGallery id={id!} photoList={photoList} deletePhoto= {deletePhotoOfAWorkOrder} refreshPhotos={refreshPhotoIdList}/>
+              }
             </Grid>
+            {(editing || isCreating) && (
+            <Grid size={12}>
+              <SimpleDropzone uploadFile={uploadPhoto} refreshScreen={refreshPhotoIdList} workOrderId={id!} label="Drag or select your file." />
+            </Grid>
+            )}
           </Grid>
+
         </Box>
 
         {/* Diálogo de confirmación */}
@@ -399,6 +430,34 @@ export default function WorkOrderView() {
             </Button>
           </DialogActions>
         </Dialog>
+
+<Dialog
+  open={openViewPDFDialog}
+  onClose={() => setOpenViewPDFDialog(false)}
+  fullWidth
+  maxWidth={false}
+  PaperProps={{
+    sx: {
+      width: '80vw',
+      height: '90vh',
+      maxHeight: '95vh',
+      overflow: 'hidden',
+    },
+  }}
+>
+  <DialogTitle>Work order</DialogTitle>
+
+  <DialogContent dividers sx={{ p: 0 }}>
+    <PDFViewer pdfUrl={`http://localhost:3142/public/v1/work-orders/${id}/ot.pdf`} />
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenViewPDFDialog(false)}>Cancel</Button>
+    <Button color="error">Sign</Button>
+  </DialogActions>
+</Dialog>
+
+
       </Container>
     </LocalizationProvider>
   );

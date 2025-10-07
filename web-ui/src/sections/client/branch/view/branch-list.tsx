@@ -17,20 +17,20 @@ export default function BranchList() {
 
   const columns: GridColDef[] = [
     {
-        hideable: false,
-        field: 'branchId',
-        headerName: 'Branch ID',
-        width: 200,
-        flex: 0.5,
-        renderCell: (params: GridRenderCellParams) => (
-          <Chip
-            label={params.value}
-            color='default'
-            variant='outlined'
-            size='small'
-            onClick={() => navigate(`/home/client/${clientId}/branch/${params.row.branchId}`)}
-          />
-        ),
+      hideable: false,
+      field: 'branchId',
+      headerName: 'Branch ID',
+      width: 200,
+      flex: 0.5,
+      renderCell: (params: GridRenderCellParams) => (
+        <Chip
+          label={params.value}
+          color='default'
+          variant='outlined'
+          size='small'
+          onClick={() => navigate(`/home/client/${clientId}/branch/${params.row.branchId}`)}
+        />
+      ),
     },
     {
       hideable: false,
@@ -38,7 +38,7 @@ export default function BranchList() {
       headerName: 'Employees',
       width: 150,
       flex: 0.4,
-      sortable:false,
+      sortable: false,
       renderCell: (params: GridRenderCellParams) => (
         <Chip
           label={'Employees'}
@@ -46,7 +46,24 @@ export default function BranchList() {
           variant='outlined'
           size='small'
           onClick={() => navigate(`/home/client/${clientId}/branch/${params.row.branchId}/employees`)}
-          />
+        />
+      ),
+    },
+    {
+      hideable: false,
+      field: 'inspectionVisit',
+      headerName: 'Inspection Visit',
+      width: 150,
+      flex: 0.4,
+      sortable: false,
+      renderCell: (params: GridRenderCellParams) => (
+        <Chip
+          label={'Inspection Visit'}
+          color='default'
+          variant='outlined'
+          size='small'
+          onClick={() => navigate(`/home/client/${clientId}/branch/${params.row.branchId}/inspectionVisit`)}
+        />
       ),
     },
     {
@@ -55,7 +72,7 @@ export default function BranchList() {
       headerName: 'Equipment',
       width: 150,
       flex: 0.4,
-      sortable:false,
+      sortable: false,
       renderCell: (params: GridRenderCellParams) => (
         <Chip
           label={'Equipment'}
@@ -63,9 +80,9 @@ export default function BranchList() {
           variant='outlined'
           size='small'
           onClick={() => navigate(`/home/client/${clientId}/branch/${params.row.branchId}/equipment`)}
-          />
+        />
       ),
-  },
+    },
     { field: 'branchName', headerName: 'Branch name', width: 200, flex: 0.5 },
     { field: 'address', headerName: 'Address', width: 200, flex: 0.5 },
     { field: 'commune', headerName: 'Commune', width: 200, flex: 0.5 },
@@ -78,8 +95,8 @@ export default function BranchList() {
     refreshData(5, 0, '', '');
   }, []);
 
-  const refreshData = (rowsPerPage:number, page:number, sort:string, filterName:string) => {
-    if(clientId){
+  const refreshData = (rowsPerPage: number, page: number, sort: string, filterName: string) => {
+    if (clientId) {
       listBranch(clientId, rowsPerPage, page, sort, filterName).then((r) => {
         setDataList(r.data.content);
         setRowCount(r.data.totalElements);

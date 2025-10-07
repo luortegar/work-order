@@ -21,12 +21,12 @@ public class VisitPhoto extends AuditableEntity {
     @UuidGenerator(style = TIME)
     private UUID visitPhotoId;
 
-    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
-    @JoinColumn(name = "inspection_visit_id")
-    private InspectionVisit inspectionVisit;
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "photo_file_id")
     private File file;
+
+    @ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    @JoinColumn(name = "inspection_visit_id")
+    private InspectionVisit inspectionVisit;
 
 }

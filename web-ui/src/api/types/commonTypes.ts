@@ -12,3 +12,10 @@ export interface Pageable {
   paged: boolean
   unpaged: boolean
 }
+
+export interface FileResponse {
+  fileId: string; 
+  fileName: string;
+  link: string;
+  referenceId:string;
+}

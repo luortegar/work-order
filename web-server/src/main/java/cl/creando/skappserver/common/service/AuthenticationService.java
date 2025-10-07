@@ -15,7 +15,6 @@ import cl.creando.skappserver.common.response.RecoverPasswordResponse;
 import cl.creando.skappserver.common.response.TenantPrivilege;
 import cl.creando.skappserver.common.response.UserTenant;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;

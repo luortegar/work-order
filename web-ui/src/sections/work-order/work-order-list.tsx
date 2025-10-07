@@ -92,7 +92,7 @@ export default function WorkOrderList() {
     create({}).then(resp=>{
       const workOrderId = resp?.data?.workOrderId;
       console.log("resp", resp.data.workOrderId);
-      navigate(`/home/work-order/${workOrderId}`);
+      navigate(`/home/work-order/${workOrderId}?edit=on`);
     })
   }
 

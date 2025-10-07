@@ -69,7 +69,7 @@ const SimpleTable: React.FC<ISimpleTableProps> = ({
             <TextField
               value={searchTerm}
               onChange={handleSearchChange}
-              placeholder="Buscar cliente..."
+              placeholder="Buscar ..."
               variant="outlined"
               fullWidth
               size="small"

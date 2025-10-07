@@ -2,11 +2,11 @@ package cl.creando.skappserver.workorder.response;
 
 import cl.creando.skappserver.workorder.entity.WorkOrder;
 import cl.creando.skappserver.workorder.entity.WorkOrderStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
 @Setter

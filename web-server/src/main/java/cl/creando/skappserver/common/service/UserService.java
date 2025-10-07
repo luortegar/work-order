@@ -2,24 +2,19 @@ package cl.creando.skappserver.common.service;
 
 
 import cl.creando.skappserver.common.CommonFunctions;
+import cl.creando.skappserver.common.entity.common.File;
 import cl.creando.skappserver.common.entity.user.Role;
+import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.entity.user.UserRole;
 import cl.creando.skappserver.common.exception.SKException;
-import cl.creando.skappserver.common.entity.common.File;
-import cl.creando.skappserver.common.entity.user.User;
 import cl.creando.skappserver.common.properties.StartedKitProperties;
+import cl.creando.skappserver.common.repository.FileRepository;
 import cl.creando.skappserver.common.repository.RoleRepository;
+import cl.creando.skappserver.common.repository.UserRepository;
 import cl.creando.skappserver.common.repository.UserRoleRepository;
 import cl.creando.skappserver.common.request.UpdatePasswordRequest;
-import cl.creando.skappserver.common.repository.FileRepository;
-import cl.creando.skappserver.common.repository.UserRepository;
 import cl.creando.skappserver.common.request.UserRequest;
 import cl.creando.skappserver.common.response.UserResponse;
-
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -32,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

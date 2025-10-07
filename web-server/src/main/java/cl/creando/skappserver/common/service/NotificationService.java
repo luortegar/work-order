@@ -1,8 +1,8 @@
 package cl.creando.skappserver.common.service;
 
-import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.entity.user.Notification;
 import cl.creando.skappserver.common.entity.user.User;
+import cl.creando.skappserver.common.exception.SKException;
 import cl.creando.skappserver.common.repository.NotificationRepository;
 import cl.creando.skappserver.common.repository.UserRepository;
 import cl.creando.skappserver.common.request.NotificationPatchRequest;
